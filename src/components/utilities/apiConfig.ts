@@ -3,7 +3,10 @@
 //
 // In future this can be flipped to read `import.meta.env.VITE_API_HOST` so
 // the build pipeline can swap it per environment without a code edit.
-export const API_HOST = "http://toolkit.teamtesting.xyz";
+//
+// MUST stay https — the app is served over https (Vercel + the GHL iframe),
+// and browsers block mixed-content (http) XHR from an https page.
+export const API_HOST = "https://hub.jdfunnel.com";
 
 // Theme-builder API root: every theme-builder endpoint lives under this path.
 export const API_BASE_URL = `${API_HOST}/themebuilder/v1`;
