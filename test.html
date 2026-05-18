@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    (async () => {
+      try {
+        console.log("Fetching data...");
+
+        const response = await fetch(
+          "https://fruity-suits-buy.loca.lt/api/theme-builder/whitelabel-domain/list",
+          {
+            headers: {
+              Authorization:
+                "Bearer 78|kRwndCxamC25N4QkdYVHrW9H0KCPfW35etJCCp1V2b5d6379",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const dataJson = await response.json();
+
+        console.log("Response Data:", dataJson);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    })();
+  </script>
+</body>
+
+</html>
+
+
+":root {\r\n --primary-color: #412344;\r\n --secondary-color: #6a346d !important;\r\n --white-color: white
+!important;\r\n --text-color: #000;\r\n --black-color: #000 !important;\r\n --background-color: #fff;\r\n
+--border-color: #e0e0e0;\r\n --font-family: 'Helvetica, Arial, sans-serif';\r\n --font-size: 16px;\r\n --hover-color:
+#f0e9cb;\r\n --filter-white-color: invert(0);\r\n --filter-black-color: invert(1);\r\n --nav-menulink-title-color:
+#fff;\r\n --nav-menulink-title-hover-color: #fff;\r\n --nav-menulink-title-active-color: #fff;\r\n --border-none:
+none;\r\n --stroke-color: #fff;\r\n --icon-color: #fff;\r\n --border-radius: 10px 10px 0px 0;\r\n --padding: 5px
+10px;\r\n --jdf-dashboard-card-bg-color: #fff;\r\n}\r\n\r\n\r\n\r\n\r\n:root {\r\n --login-header-toggle: none;\r\n
+--login-background-image-url:
+url(https:\/\/storage.googleapis.com\/msgsndr\/1X9AaHS8HsMd504XC6nU\/media\/671637689aa1d7814ed08e50.webp);\r\n
+--card-bg-color: #ffffff99;\r\n --login-card-logo-image-url:
+url(https:\/\/storage.googleapis.com\/msgsndr\/1X9AaHS8HsMd504XC6nU\/media\/6491dc2adbd89a61b3511f5e.png);\r\n
+--card-margin-left: 0rem;\r\n --card-margin-right: 0rem;\r\n}\r\n\r\n\r\n:root {\r\n --jdf-login-header:
+var(--login-header-toggle);\r\n --jdf-login-top-header-bg-color: var(--primary-color);\r\n}\r\n\r\n\r\n:root {\r\n
+--jdf-login-background-image: var(--login-background-image-url);\r\n}\r\n\r\n\r\n:root {\r\n
+--jdf-login-card-background-color: var(--card-bg-color);\r\n --jdf-login-card-logo-image:
+var(--top-card-logo-image);\r\n --jdf-login-card-heading-color: var(--black-color);\r\n --jdf-login-button-bg-color:
+var(--primary-color);\r\n --jdf-login-card-foot-note-color: var(--black-color);\r\n
+--jdf-login-card-forgotpassword-termsandcondition-color: var(--primary-color);\r\n --jdf-login-input-label-text-color:
+var(--black-color);\r\n --jdf-login-card-left-side: var(--card-margin-left);\r\n --jdf-login-card-right-side:
+var(--card-margin-right);\r\n}\r\n\r\n\r\n:root {\r\n --jdf-quick-action-button-hover-color:
+var(--white-text-color);\r\n --jdf-quick-action-button-hover-border: var(--primary-color);\r\n
+--jdf-quick-action-button-hover-bg: var(--primary-color);\r\n --jdf-quick-action-button-color:
+var(--white-text-color);\r\n --jdf-quick-action-button-border-color: var(--white-text-color);\r\n
+--jdf-quick-action-button-bg-color: var(--primary-color);\r\n --jdf-quick-action-button-margin:
+5px;\r\n}\r\n\r\n\r\n:root {\r\n --jdf-location-switcher-color: var(--white-text-color);\r\n
+--jdf-location-switcher-border: var(--border-color);\r\n --jdf-location-switcher-bg: var(--primary-color);\r\n
+--jdf-location-switcher-icon-filter: var(--filter-white-color) !important;\r\n --jdf-location-switcher-icon-path-color:
+var(--white-text-color);\r\n --jdf-location-switcher-caret-holder-color: var(--white-text-color);\r\n}\r\n\r\n\r\n:root
+{\r\n --jdf-searchOpener-bg-color: var(--background-color);\r\n --jdf-searchOpener-border-color:
+var(--white-text-color);\r\n --jdf-searchOpener-search-icon-color: var(--white-text-color);\r\n
+--jdf-searchOpener-input-placeholder-color: var(--white-text-color);\r\n}\r\n\r\n:root {\r\n\r\n --jdf-sidebar-nav-bg:
+var(--primary-color);\r\n --jdf-sidebar-nav-title-color: var(--nav-menulink-title-color);\r\n
+--jdf-sidebar-nav-divider-color: var(--secondary-color);\r\n --jdf-sidebar-icon-filter-color: var(--filter-white-color)
+!important;\r\n --jdf-sidebar-icon-color: var(--white-text-color);\r\n --jdf-back-button-color:
+var(--white-text-color);\r\n --jdf-back-button-bg-color: var(--secondary-color);\r\n --jdf-sidebar-divider-border:
+var(--border-none);\r\n --jdf-sidebar-badge-bg-color: var(--secondary-color);\r\n --jdf-sidebar-badge-bg-color:
+var(--white-text-color);\r\n --jdf-sidebar-setting-text-color: var(--white-text-color);\r\n
+--jdf--sidebar-icon-hover-filter-color: var(--filter-white-color);\r\n --jdf--sidebar-icon-active-filter-color:
+brightness(0.8);\r\n --jdf--sidebar-nav-hover-bg-color: var(--secondary-color);\r\n --jdf--sidebar-nav-active-bg-color:
+var(--secondary-color);\r\n --jdf--sidebar-nav-hover-color: var(--nav-menulink-title-hover-color);\r\n
+--jdf--sidebar-nav-active-color: var(--nav-menulink-title-hover-color);\r\n --jdf--sidebar-icon-firstchild-filter-color:
+var(--filter-white-color) !important;\r\n --jdf--sidebar-icon-firstchild-hover-filter-color:
+var(--filter-white-color);\r\n --jdf--sidebar-icon-firstchild-active-filter-color: var(--filter-white-color);\r\n
+--jdf--sidebar-nav-active-divider-bg-color: var(--primary-color);\r\n}\r\n\r\n\/* Top Header Styles *\/\r\n:root {\r\n
+--jdf-header-tooggler-bg-color: var(--white-text-color);\r\n --jdf-header-tooggler-icon-color: var(--primary-color);\r\n
+--jdf-header-avatar-dropdown-toggle-bg-color: var(--white-text-color);\r\n --jdf-header-avatar-dropdown-toggle-color:
+var(--primary-color);\r\n --jdf-header-tooggler-dialer-error-bg-color: var(--white-text-color);\r\n
+--jdf-header-icon-color: var(--white-text-color);\r\n --jdf-header-button-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);\r\n
+--jdf-header-button-border: var(--jdf-border-color);\r\n --jdf-header-bg: var(--primary-color);\r\n
+--jdf-header-calender-update-bg-color: var(--primary-color);\r\n --jdf-header-calender-update-color:
+var(--white-text-color);\r\n}\r\n\r\n\r\n:root {\r\n --jdf-header-topnav-bg-color: var(--white-text-color);\r\n
+--jdf-header-topnav-item-active-bg-color: var(--secondary-color);\r\n --jdf-header-topnav-active-item-color:
+var(--black-color);\r\n --jdf-header-topnav-item-color: var(--black-color);\r\n --jdf-header-topnav-item-hover-bg-color:
+var(--secondary-color);\r\n --jdf-header-topnav-item-hover-color: var(--black-color);\r\n
+--jdf-header-topnav-item-border: var(--primary-color);\r\n}\r\n\r\n:root {\r\n --jdf-dashboard-bg-color:
+var(--secondary-color);\r\n --jdf-dashboard-header-bg-color: var(--secondary-color);\r\n
+--jdf-dashboard-header-btn--edit-bg-color: var(--primary-color);\r\n --jdf-dashboard-header-btn--edit-icon-color:
+var(--stroke-color);\r\n --jdf-dashboard-card-header-bg-color: var(--jdf-Secondary-color);\r\n
+--dashbiard-card-footer-bg-color: var(--jdf-Secondary-color);\r\n}\r\n\r\n\r\n:root {\r\n --jdf-dashboard-card-bg-color:
+var(--white-text-color);\r\n --jdf-dashboard-card-border-radius: var(--border-radius);\r\n
+--jdf-dashboard-card-header-bg-color: var(--primary-color);\r\n --jdf-dashboard-card-header-heading-color:
+var(--white-text-color);\r\n --jdf-dashboard-card-header-border-radius: var(--border-radius);\r\n
+--jdf-dashboard-card-header-dropdown-bg-color: var(--secondary-color);\r\n
+--jdf-dashboard-card-header-dropdown-hover-bg-color: var(--secondary-color);\r\n
+--jdf-dashboard-card-header-dropdown-hover-text-color: var(--white-text-color);\r\n
+--jdf-dashboard-card-header-dropdown-color: var(--white-text-color);\r\n
+--jdf-dashboard-card-header-dropdown-checked-icon-color: var(--white-text-color);\r\n
+--jdf-dashboard-card-header-dropdown-icon-color: var(--icon-color);\r\n --jdf-dashboard-card-search-icon-color:
+var(--white-text-color);\r\n --dashboard-card-footer-bg-color: var(--white-text-color);\r\n
+--jdf--dashboard-card-echarts-color: var(--primary-color);\r\n --jdf--dashboard-card-echarts-dot-color:
+var(--white-text-color);\r\n\r\n}\r\n\r\n\r\n:root {\r\n --jdf-dashboard-input-dropdown-bg-color:
+var(--primary-color);\r\n --jdf-dashboard-input-dropdown-icon-color: var(--white-text-color);\r\n
+--jdf-dashboard-input-select-icon-option-bg-color: var(--secondary-color);\r\n
+--jdf-dashboard-input-select-icon-option-color: var(--white-text-color);\r\n
+--jdf-dashboard-input-select-icon-option-active-bg-color: var(--secondary-color);\r\n
+--jdf-dashboard-input-select-icon-option-active-color: var(--white-text-color);\r\n
+--jdf-dashboard-input-select-icon-option-active-checked-icon-color: var(--white-text-color);\r\n
+--jdf-dashboard-input-select-border-color: var(--primary-color);\r\n --jdf-dashboard-input-placeholder-color:
+var(--white-text-color);\r\n}\r\n\r\n\r\n\r\n:root {\r\n --jdf--dashboard-pagination-bg-color: var(--primary-color);\r\n
+--jdf--dashboard-pagination-color: var(--primary-color);\r\n}\r\n\r\n\r\n:root {\r\n --jdf-dashboard-button-bg-color:
+var(--primary-color);\r\n --jdf-dashboard-button-color: var(--white-text-color);\r\n --jdf-dashboard-button-hover-color:
+var(--primary-color);\r\n --jdf-dashboard-button-pressed-color: var(--primary-color);\r\n
+--jdf-dashboard-button-focus-color: var(--primary-color);\r\n --jdf-dashboard-button-disabled-color:
+var(--primary-color);\r\n --jdf-dashboard-button-border-color: var(--primary-color);\r\n}\r\n\r\n\r\n:root {\r\n
+--jdf-dashboard-smartlist-bg-color: var(--primary-color);\r\n --jdf-dashboard-smartlist-color:
+var(--white-text-color);\r\n --jdf-dashboard-smartlist-icon-color: var(--white-text-color);\r\n
+--jdf-dashboard-smartlist-filter-image-color: var(--filter-white-color);\r\n --jdf-dashboard-smartlist-border-color:
+var(--primary-color);\r\n --jdf-dashboard-smartlist-foucs-color: var(--primary-color);\r\n
+--jdf-dashboard-smartlist-table-header-bg-color: var(--primary-color);\r\n
+--jdf-dashboard-smartlist-table-heading-color: var(--white-text-color);\r\n}\r\n\r\n\r\n:root {\r\n
+--jdf-dashboard-Opportunies-bg-color: var(--primary-color);\r\n --jdf-dashboard-Opportunies-heading-color:
+var(--white-text-color);\r\n --jdf-dashboard-Opportunies-smallheading-color: var(--white-text-color);\r\n
+--jdf-dashboard-Opportunies-border-color: var(--primary-color);\r\n --jdf-dashboard-Opportunies-active-color:
+var(--primary-color);\r\n --jdf-dashboard-Opportunies-count-button-bg-color: var(--secondary-color);\r\n
+--jdf-dashboard-Opportunies-count-button-color: var(--black-color);\r\n
+--jdf-dashboard-Opportunies-filter-sort-bg-color: var(--secondary-color);\r\n
+--jdf-dashboard-Opportunies-filter-sort-color: var(--black-color);\r\n
+--jdf-dashboard-Opportunies-filter-sort-border-color: var(--secondary-color);\r\n}\r\n\r\n\r\n:root {\r\n
+--jdf--dashboard-reputation-card-border-radius: var(--border-color);\r\n
+--jdf--dashboard-reputation-card-header-bg-color: var(--primary-color);\r\n
+--jdf--dashboard-reputation-card-header-color: var(--white-text-color);\r\n
+--jdf--dashboard-reputation-card-header-padding: var(--padding);\r\n}\r\n\r\n\r\n:root {\r\n
+--jdf--dashboard-reporting-card-border-radius: var(--border-radius);\r\n
+--jdf--dashboard-reporting-header-card-bg-color: var(--primary-color);\r\n
+--jdf--dashboard-reporting-header-card-heading-color: var(--white-text-color);\r\n
+--jdf--dashboard-reporting-header-card-padding: var(--padding);\r\n
+--jdf--dashboard-reporting-header-card-border-radius: var(--border-radius);\r\n
+--jdf-dashboard-reporting-button-bg-color: var(--primary-color);\r\n --jdf-dashboard-reporting-button-color:
+var(--white-text-color);\r\n --jdf--dashboard-reporting-datepicker-bg-color: var(--primary-color);\r\n
+--jdf--dashboard-reporting-datepicker-color: var(--white-text-color);\r\n
+--jdf--dashboard-reporting-radio-button-checked-bg-color: var(--primary-color);\r\n
+--jdf--dashboard-reporting-radio-button-checked-color: var(--white-text-color);\r\n}\r\n\r\n\r\n\r\n:root {\r\n
+--jdf-collapse-button-color: var(--white-text-color);\r\n --jdf-collapse-button-bg-color: var(--secondary-color)\r\n}"

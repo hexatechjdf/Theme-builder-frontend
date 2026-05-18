@@ -1,0 +1,171 @@
+{
+	"dashboard": {
+		"quickAction": [
+			{ "key": "quickActionButtonHoverColor", "value": "#000000" },
+			{ "key": "quickActionButtonColor", "value": "#000000" },
+			{ "key": "quickActionButtonBorderColor", "value": "#000000" },
+			{ "key": "quickActionButtonBgColor", "value": "#000000" },
+			{ "key": "quickActionButtonMargin", "value": 0 }
+		],
+		"locationSwitcher": [
+			{ "key": "locationSwitcherColor", "value": "#000000" },
+			{ "key": "locationSwitcherBorder", "value": "#000000" },
+			{ "key": "locationSwitcherBg", "value": "#000000" },
+			{ "key": "locationSwitcherIconPathColor", "value": "#000000" },
+			{ "key": "locationSwitcherCaretHolderColor", "value": "#000000" },
+			{ "key": "locationSwitcherIconFilter", "value": 0 }
+		],
+		"sidebarNavbar": [
+			{ "key": "sidebarNavBg", "value": "#000000" },
+			{ "key": "sidebarNavTitleColor", "value": "#000000" },
+			{ "key": "sidebarNavHoverActiveBgColor", "value": "#000000" },
+			{ "key": "sidebarNavHoverActiveColor", "value": "#000000" },
+			{ "key": "sidebarNavHoverActiveDividerColor", "value": "#000000" },
+			{ "key": "sidebarNavDividerColor", "value": "#000000" },
+			{ "key": "sidebarIconColor", "value": "#000000" },
+			{ "key": "sidebarIconHoverActiveColor", "value": "#000000" },
+			{ "key": "backButtonColor", "value": "#000000" },
+			{ "key": "backButtonBgColor", "value": "#000000" },
+			{ "key": "sidebarBadgeBgColor", "value": "#000000" },
+			{ "key": "sidebarSettingTextColor", "value": "#000000" },
+			{ "key": "headerIconColor", "value": "#000000" },
+			{ "key": "headerCalenderUpdateBgColor", "value": "#000000" },
+			{ "key": "headerCalenderUpdateColor", "value": "#000000" },
+			{ "key": "sidebarDividerBorder", "value": 0 },
+			{ "key": "sidebarIconFirstChildHoverActiveFilterColor", "value": 0 },
+			{ "key": "sidebarIconFirstChildFilterColor", "value": 0 },
+			{ "key": "sidebarIconHoverActiveFilterColor", "value": 0 },
+			{ "key": "sidebarIconFilterColor", "value": 0 }
+		],
+		"searchOpener": [
+			{ "key": "searchOpenerBgColor", "value": "#000000" },
+			{ "key": "searchOpenerBorderColor", "value": "#000000" },
+			{ "key": "searchOpenerSearchIconColor", "value": "#000000" },
+			{ "key": "searchOpenerInputPlaceholderColor", "value": 0 }
+		],
+		"topHeader": [
+			{ "key": "headerToogglerBgColor", "value": "#000000" },
+			{ "key": "headerToogglerIconColor", "value": "#000000" },
+			{ "key": "headerAvatarDropdownToggleBgColor", "value": "#000000" },
+			{ "key": "headerAvatarDropdownToggleColor", "value": "#000000" },
+			{ "key": "headerToogglerDialerErrorBgColor", "value": "#000000" },
+			{ "key": "headerIconColor", "value": "#000000" },
+			{ "key": "headerBg", "value": "#000000" },
+			{ "key": "headerButtonShadow", "value": 0 },
+			{ "key": "headerButtonBorder", "value": 0 }
+		],
+		"topHeaderTopnav": [
+			{ "key": "headerTopnavBgColor", "value": "#000000" },
+			{ "key": "headerTopnavItemActiveBgColor", "value": "#000000" },
+			{ "key": "headerTopnavActiveItemColor", "value": "#000000" },
+			{ "key": "headerTopnavItemColor", "value": "#000000" },
+			{ "key": "headerTopnavItemHoverBgColor", "value": "#000000" },
+			{ "key": "headerTopnavItemHoverColor", "value": "#000000" },
+			{ "key": "headerTopnavItemBorder", "value": 0 }
+		],
+		"rightSideDashboardHeader": [
+			{ "key": "dashboardBgColor", "value": "#000000" },
+			{ "key": "dashboardHeaderBgColor", "value": "#000000" },
+			{ "key": "dashboardCardHeaderBgColor", "value": "#000000" },
+			{ "key": "dashbiardCardFooterBgColor", "value": "#000000" },
+			{ "key": "dashboardCardHeaderHeadingColor", "value": "#000000" },
+			{ "key": "dashboardCardSearchIconColor", "value": "#000000" }
+		],
+		"dashboardCard": [
+			{ "key": "dashboardCardBgColor", "value": "#000000" },
+			{ "key": "dashboardCardHeaderBgColor", "value": "#000000" },
+			{ "key": "dashboardCardFooterBgColor", "value": "#000000" },
+			{ "key": "dashboardCardEchartsColor", "value": "#000000" },
+			{ "key": "dashboardCardEchartsDotColor", "value": "#000000" },
+			{ "key": "dashboardCardHeaderHeadingColor", "value": "#000000" },
+			{ "key": "dashboardCardHeaderDropdownBgColor", "value": "#000000" },
+			{ "key": "dashboardCardHeaderDropdownColor", "value": "#000000" },
+			{
+				"key": "dashboardCardHeaderDropdownCheckedIconColor",
+				"value": "#000000"
+			},
+			{ "key": "dashboardCardHeaderDropdownIconColor", "value": "#000000" },
+			{ "key": "dashboardCardSearchIconColor", "value": "#000000" },
+			{ "key": "dashboardCardBorderRadius", "value": 0 },
+			{ "key": "dashboardCardHeaderBorderRadius", "value": 0 }
+		],
+		"inputDropdown": [
+			{ "key": "dashboardInputDropdownIconColor", "value": "#000000" },
+			{ "key": "dashboardInputSelectIconOptionBgColor", "value": "#000000" },
+			{ "key": "dashboardInputSelectIconOptionColor", "value": "#000000" },
+			{
+				"key": "dashboardInputSelectIconOptionActiveBgColor",
+				"value": "#000000"
+			},
+			{
+				"key": "dashboardInputSelectIconOptionActiveColor",
+				"value": "#000000"
+			},
+			{
+				"key": "dashboardInputSelectIconOptionActiveCheckedIconColor",
+				"value": "#000000"
+			},
+			{ "key": "dashboardInputSelectBorderColor", "value": 0 }
+		],
+		"paginationButton": [
+			{ "key": "dashboardPaginationBgColor", "value": "#000000" },
+			{ "key": "dashboardPaginationColor", "value": "#000000" }
+		],
+		"button": [
+			{ "key": "dashboardButtonBgColor", "value": "#000000" },
+			{ "key": "dashboardButtonColor", "value": "#000000" },
+			{ "key": "dashboardButtonHoverColor", "value": "#000000" },
+			{ "key": "dashboardButtonPressedColor", "value": "#000000" },
+			{ "key": "dashboardButtonFocusColor", "value": "#000000" },
+			{ "key": "dashboardButtonDisabledColor", "value": "#000000" },
+			{ "key": "dashboardButtonBorderColor", "value": "#000000" }
+		],
+		"smartList": [
+			{ "key": "dashboardSmartlistBgColor", "value": "#000000" },
+			{ "key": "dashboardSmartlistColor", "value": "#000000" },
+			{ "key": "dashboardSmartlistIconColor", "value": "#000000" },
+			{ "key": "dashboardSmartlistBorderColor", "value": "#000000" },
+			{ "key": "dashboardSmartlistFocusColor", "value": "#000000" },
+			{ "key": "dashboardSmartlistTableHeaderBgColor", "value": "#000000" },
+			{ "key": "dashboardSmartlistTableHeadingColor", "value": "#000000" },
+			{ "key": "dashboardSmartlistFilterImageColor", "value": 0 }
+		],
+		"opportunities": [
+			{ "key": "dashboardOpportunitiesBgColor", "value": "#000000" },
+			{ "key": "dashboardOpportunitiesHeadingColor", "value": "#000000" },
+			{ "key": "dashboardOpportunitiesSmallHeadingColor", "value": "#000000" },
+			{ "key": "dashboardOpportunitiesBorderColor", "value": "#000000" },
+			{ "key": "dashboardOpportunitiesActiveColor", "value": "#000000" },
+			{ "key": "dashboardOpportunitiesCountButtonBgColor", "value": "#000000" },
+			{ "key": "dashboardOpportunitiesCountButtonColor", "value": "#000000" },
+			{ "key": "dashboardOpportunitiesFilterSortBorderColor", "value": 0 },
+			{ "key": "dashboardOpportunitiesFilterSortBgColor", "value": 0 },
+			{ "key": "dashboardOpportunitiesFilterSortColor", "value": 0 }
+		],
+		"reputationCard": [
+			{ "key": "dashboardReputationCardHeaderBgColor", "value": "#000000" },
+			{ "key": "dashboardReputationCardHeaderColor", "value": "#000000" },
+			{ "key": "dashboardReputationCardBorderRadius", "value": 0 },
+			{ "key": "dashboardReputationCardHeaderPadding", "value": 0 }
+		],
+		"reportingCard": [
+			{ "key": "dashboardReportingCardBorderRadius", "value": "#000000" },
+			{ "key": "dashboardReportingHeaderCardBgColor", "value": "#000000" },
+			{ "key": "dashboardReportingButtonBgColor", "value": "#000000" },
+			{ "key": "dashboardReportingButtonColor", "value": "#000000" },
+			{ "key": "dashboardReportingDatepickerBgColor", "value": "#000000" },
+			{ "key": "dashboardReportingDatepickerColor", "value": "#000000" },
+			{
+				"key": "dashboardReportingRadioButtonCheckedBgColor",
+				"value": "#000000"
+			},
+			{
+				"key": "dashboardReportingRadioButtonCheckedColor",
+				"value": "#000000"
+			},
+			{ "key": "dashboardReportingHeaderCardBorderRadius", "value": 0 },
+			{ "key": "dashboardReportingHeaderCardHeadingColor", "value": 0 },
+			{ "key": "dashboardReportingHeaderCardPadding", "value": 0 }
+		]
+	}
+}

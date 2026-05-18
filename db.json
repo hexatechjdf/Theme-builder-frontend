@@ -1,0 +1,78 @@
+{
+  "posts": [
+    {
+      "id": "5f8c",
+      "primary-color": "#00ffff",
+      "nav-menulink-title-active-color": "#7d1a1a",
+      "sidebar-icon-firstchild-filter-color": "brightness(0) saturate(100%) invert(17%) sepia(40%) saturate(1980%) hue-rotate(329deg) brightness(92%) contrast(114%)",
+      "searchOpener-border-color": "#461212",
+      "dashboard-card-header-border-radius": "45"
+    },
+    {
+      "id": "55f4",
+      "login-top-header-bg-color": "#ff0000",
+      "card-bg-color": "#ff0000",
+      "login-card-margin-left": "12",
+      "login-card-bg-color": "#be4a4a"
+    },
+    {
+      "id": "2286",
+      "themeId": 1,
+      "dashboard": {},
+      "login": {
+        "login-card-bg-color": "#6c1414",
+        "login-background-image-url": "C:\\fakepath\\4K Nature Wallpaper For Windows 10 Ideas.jpeg",
+        "login-card-logo-image": "C:\\fakepath\\4K Nature Wallpaper For Windows 10 Ideas.jpeg"
+      }
+    },
+    {
+      "id": "baba",
+      "themeId": 1,
+      "dashboard": {
+        "nav-menulink-title-hover-color": "#651f1f",
+        "secondary-color": "#5b1212",
+        "back-button-color": "#c31919",
+        "header-calender-update-bg-color": "#0d4a4a",
+        "dashboard-card-search-icon-color": "#b72a2a"
+      },
+      "login": {
+        "login-input-label-text-color": "#b11a1a",
+        "login-card-logo-image": "C:\\fakepath\\4K Nature Wallpaper For Windows 10 Ideas.jpeg",
+        "login-background-image-url": "C:\\fakepath\\4K Nature Wallpaper For Windows 10 Ideas.jpeg"
+      }
+    },
+    {
+      "id": "4c6e",
+      "themeId": 1,
+      "dashboard": {
+        "primary-color": "#408686",
+        "border-radius": "134",
+        "font-size": "12",
+        "filter-black-color": "brightness(0) saturate(100%) invert(0%) sepia(98%) saturate(7496%) hue-rotate(353deg) brightness(93%) contrast(98%)",
+        "quick-action-button-hover-color": "#261616",
+        "searchOpener-border-color": "#d42a2a"
+      },
+      "login": {
+        "login-card-logo-image": "C:\\fakepath\\4K Nature Wallpaper For Windows 10 Ideas.jpeg",
+        "login-card-margin-left": "13",
+        "login-background-image-url": "C:\\fakepath\\Beautiful northern lights landscape Aurora borealis above mountains reflected in the sea _ Premium AI-generated image.jpeg",
+        "login-card-heading-color": "#000080",
+        "login-card-background-color": "#008000",
+        "login-input-label-text-color": "#ffff00",
+        "login-card-forgotpassword-termsandcondition-color": "#f0672e"
+      }
+    },
+    {
+      "id": "989f",
+      "themeId": 1,
+      "dashboard": {},
+      "login": {}
+    },
+    {
+      "id": "d133",
+      "themeId": 1,
+      "dashboard": {},
+      "login": {}
+    }
+  ]
+}
