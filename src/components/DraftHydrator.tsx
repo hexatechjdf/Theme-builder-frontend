@@ -35,13 +35,17 @@ const DraftHydrator = () => {
 	const { effectiveDraft, isSuccess } = useGetUpdatedUserThemeSetting();
 	const { data: themesList } = useUserTheme();
 
-	const setDashboardTheme = useSetRecoilState(selectedThemeFamily("dashboard"));
-	const setLoginTheme = useSetRecoilState(selectedThemeFamily("login"));
 	const level = useRecoilValue(levelModeAtom);
 	const currentLocationId =
 		level.mode === "subaccount"
 			? level.subaccountId ?? "agency"
 			: "agency";
+	const setDashboardTheme = useSetRecoilState(
+		selectedThemeFamily({ themeType: "dashboard", locationId: currentLocationId }),
+	);
+	const setLoginTheme = useSetRecoilState(
+		selectedThemeFamily({ themeType: "login", locationId: currentLocationId }),
+	);
 	const { pathname } = useLocation();
 	const activeSection = sectionFromPathname(pathname);
 

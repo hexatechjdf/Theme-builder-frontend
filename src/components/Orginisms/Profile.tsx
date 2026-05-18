@@ -65,7 +65,9 @@ const Profile = () => {
                         </Box>
                     ) : (
                         <Avatar.Root w="26px" h="26px" border="2px solid" borderColor="whiteAlpha.500">
-                            <Avatar.Fallback name={userName} />
+                            <Avatar.Fallback>
+                            {userName ? userName.trim().charAt(0).toUpperCase() : "?"}
+                        </Avatar.Fallback>
                             <Avatar.Image src={userIcon} />
                         </Avatar.Root>
                     )}

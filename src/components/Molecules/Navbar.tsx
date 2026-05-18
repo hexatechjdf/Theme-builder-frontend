@@ -44,8 +44,8 @@ const StickyNavbar: React.FC = () => {
 
 
 
-	const handleTabChange = (details: { value: TabValue }) => {
-		const { value } = details;
+	const handleTabChange = (details: { value: string }) => {
+		const value = details.value as TabValue;
 		setSelectedTab(value);
 		localStorage.setItem("selectedTab", value);
 		naviagteTabTo(value)

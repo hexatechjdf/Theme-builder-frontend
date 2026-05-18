@@ -62,11 +62,8 @@ const DropDownMenu: React.FC<DropDownProps> = ({ label, placeholder = "Select an
 
 
 
-	const handleColorChange = (selectedValue: {
-		value: Array<string>;
-		label: string;
-	}) => {
-		const selected = selectedValue.value[0];
+	const handleColorChange = (details: { value: string[] }) => {
+		const selected = details.value[0];
 		setDropDownState(selected);
 		store.set(`dropdown_${id}`, selected); // ✅ Persist
 	};

@@ -1,71 +1,84 @@
-import { defineConfig, createSystem, ThemeConfig } from "@chakra-ui/react";
+import { defineConfig, createSystem } from "@chakra-ui/react";
 
-// Define the color tokens for light and dark modes
-const config: ThemeConfig = defineConfig({
-	cssVarsRoot: ":where(:root, :host)", // where CSS variables will be applied
+// Custom Chakra v3 system definition.
+//
+// NOTE: this is currently unused — `ChakraProvider.tsx` mounts Chakra's
+// `defaultSystem`. It's kept as a ready-made starting point for theming work;
+// to activate it, import this default export and pass it to <ChakraProvider>.
+const config = defineConfig({
+	// Where the generated CSS variables are applied.
+	cssVarsRoot: ":where(:root, :host)",
+
+	// Global styles.
+	globalCss: {
+		"html, body": {
+			margin: 0,
+			padding: 0,
+			boxSizing: "border-box",
+			backgroundColor: "var(--chakra-colors-background)",
+			color: "var(--chakra-colors-text)",
+		},
+	},
+
 	theme: {
-		colors: {
-			// Light mode colors
-			light: {
-				background: "#f0f0f0",
-				text: "#333333",
-				primary: "#6200ea", // Purple for primary color
-				secondary: "#03dac6", // Teal for secondary color
-			},
-			// Dark mode colors
-			dark: {
-				background: "#121212",
-				text: "#e0e0e0",
-				primary: "#bb86fc", // Light Purple for primary color
-				secondary: "#03dac6", // Teal for secondary color
-			},
-		},
-		semanticTokens: {
-			colors: {
-				// Danger token
-				danger: {
-					value: "{colors.red.500}",
-				},
-				// Background and text colors will change based on theme mode
-				background: {
-					default: "{colors.light.background}",
-					_dark: "{colors.dark.background}",
-				},
-				text: {
-					default: "{colors.light.text}",
-					_dark: "{colors.dark.text}",
-				},
-				primary: {
-					default: "{colors.light.primary}",
-					_dark: "{colors.dark.primary}",
-				},
-				secondary: {
-					default: "{colors.light.secondary}",
-					_dark: "{colors.dark.secondary}",
-				},
-			},
-		},
-		// Breakpoints for responsive design
+		// Breakpoints for responsive design.
 		breakpoints: {
 			sm: "320px",
 			md: "768px",
 			lg: "960px",
 			xl: "1200px",
 		},
-		// Global styles
-		globalCss: {
-			"html, body": {
-				margin: 0,
-				padding: 0,
-				boxSizing: "border-box",
-				backgroundColor: "var(--chakra-colors-background)", // Use background color from tokens
-				color: "var(--chakra-colors-text)", // Use text color from tokens
+
+		// Raw color tokens for light and dark palettes.
+		tokens: {
+			colors: {
+				light: {
+					background: { value: "#f0f0f0" },
+					text: { value: "#333333" },
+					primary: { value: "#6200ea" }, // Purple
+					secondary: { value: "#03dac6" }, // Teal
+				},
+				dark: {
+					background: { value: "#121212" },
+					text: { value: "#e0e0e0" },
+					primary: { value: "#bb86fc" }, // Light purple
+					secondary: { value: "#03dac6" }, // Teal
+				},
+			},
+		},
+
+		// Semantic tokens — resolve to the light value by default and the
+		// dark value under the `_dark` condition.
+		semanticTokens: {
+			colors: {
+				danger: { value: "{colors.red.500}" },
+				background: {
+					value: {
+						base: "{colors.light.background}",
+						_dark: "{colors.dark.background}",
+					},
+				},
+				text: {
+					value: {
+						base: "{colors.light.text}",
+						_dark: "{colors.dark.text}",
+					},
+				},
+				primary: {
+					value: {
+						base: "{colors.light.primary}",
+						_dark: "{colors.dark.primary}",
+					},
+				},
+				secondary: {
+					value: {
+						base: "{colors.light.secondary}",
+						_dark: "{colors.dark.secondary}",
+					},
+				},
 			},
 		},
 	},
-	// Enable dark mode support with system-based theme switching
-	initialColorMode: "light", // Default to light mode
-	useSystemColorMode: true, // Automatically switch to dark mode if the user prefers it
 });
 
 export default createSystem(config);

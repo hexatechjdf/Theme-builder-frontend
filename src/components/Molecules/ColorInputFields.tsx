@@ -1,7 +1,7 @@
 
 
 import React, { useEffect, useRef, useState } from "react";
-import { Box, Flex, Input, Text, parseColor } from "@chakra-ui/react";
+import { Box, Flex, Input, Text, chakra, parseColor } from "@chakra-ui/react";
 import {
 	ColorPickerControl,
 	ColorPickerInput,
@@ -211,8 +211,7 @@ const ColorInputFields: React.FC<ColorInputFieldsProps> = ({
 					{label.label}
 				</Text>
 				<Flex gap={2} align="center">
-					<Box
-						as="button"
+					<chakra.button
 						type="button"
 						onClick={() => setDrawerOpen(true)}
 						w="38px"

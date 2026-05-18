@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from "axios";
-import { SSO_TOKEN, APP_KEY } from "../utilities/appHeaders";
+import { getGhlRuntimeContext } from "../utilities/ghlRuntimeContext";
 import { API_BASE_URL } from "../utilities/apiConfig";
 
 export interface SendOtpRequest {
@@ -33,8 +33,9 @@ const otpAxios = axios.create({
 
 otpAxios.interceptors.request.use((config) => {
   config.headers = config.headers || {};
-  config.headers["SSO-Token"] = SSO_TOKEN;
-  config.headers["APP-KEY"] = APP_KEY;
+  const ghl = getGhlRuntimeContext();
+  config.headers["SSO-Token"] = ghl.ssoToken;
+  config.headers["APP-KEY"] = ghl.appKey;
   return config;
 });
 

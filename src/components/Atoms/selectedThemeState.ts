@@ -17,10 +17,13 @@ export type Theme = {
 // previously the family was keyed only by themeType, so picking a theme on a
 // subaccount would silently change the agency's selection (and vice-versa).
 // Now agency and each subaccount keep independent picks.
-export interface SelectedThemeKey {
+// A plain object `type` (not an `interface`) so it satisfies Recoil's
+// `SerializableParam` constraint on atomFamily — interfaces lack the implicit
+// string index signature that constraint requires.
+export type SelectedThemeKey = {
   themeType: ThemeType;
   locationId: string;
-}
+};
 
 const store2Effect = (key: string) => ({ setSelf, onSet }: any) => {
   const saved = store.get(key);

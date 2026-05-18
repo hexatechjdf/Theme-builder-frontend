@@ -6,6 +6,7 @@ import Routes from "./components/Routes/Routes";
 import ReactQueryProvider from "./ReactQueryProvider";
 import { ToastContainer } from "react-toastify";
 import { ContextProvider } from "./components/context/CustomAttributeContextApi";
+import GHLSSOProvider from "./components/Auth/GHLSSOProvider";
 const App: React.FC = () => {
 	return (
 		<ContextProvider>
@@ -14,7 +15,9 @@ const App: React.FC = () => {
 					<RecoilRoot>
 						<ChakraProvider>
 							  {/* <ThemeLoader /> */}
-							<Routes />
+							<GHLSSOProvider>
+								<Routes />
+							</GHLSSOProvider>
 						</ChakraProvider>
 					</RecoilRoot>
 				</Router>

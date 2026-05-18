@@ -233,6 +233,11 @@ export const quickActionStyles = {
 	string: {},
 };
 
+/*
+  Reference CSS output for the quick-action styles above. Kept as a block
+  comment so this `.ts` file stays valid TypeScript (raw CSS here was
+  breaking the production build).
+
 :root {
     --jdf-quick-action-button-hover-color: var(--white-text-color);
     --jdf-quick-action-button-hover-border: var(--primary-color);
@@ -242,3 +247,4 @@ export const quickActionStyles = {
     --jdf-quick-action-button-bg-color: var(--primary-color);
     --jdf-quick-action-button-margin: 5px;
 }
+*/

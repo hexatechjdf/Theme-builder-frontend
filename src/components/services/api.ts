@@ -6,10 +6,10 @@ import { useRecoilValue } from "recoil";
 import { useLocation } from "react-router-dom";
 import useFetchData from "../hooks/useFetchData"; // Import the custom hook
 import usePostData from "../hooks/usePostData";
-import { APP_KEY } from "../utilities/appHeaders";
 import { CRM_HANDLER_URL } from "../utilities/apiConfig";
 import type { SchemaSection } from "../Dictionaries/themeSchema";
 import { levelModeAtom, type Subaccount } from "../Atoms/levelMode";
+import { ghlContextAtom } from "../Atoms/ghlContext";
 
 // `theme_roots` and `login_roots` can both define the same CSS-variable key
 // with DIFFERENT values (e.g. `--primary-color`). Since they share the one
@@ -38,6 +38,7 @@ interface Theme {
 
 interface DashboardTheme {
 	id: string;
+	theme_uuid: string;
 	title: string;
 	type: string;
 	image: string;
@@ -434,37 +435,42 @@ export const useThemeRootSections = (themeUuid: string | null | undefined) => {
 	return { sections, themeTitle, error, isLoading, isFetching };
 };
 
-// Hardcoded for now per product. When live: feed company_id / app_id from the
-// GHL bootstrap context, not from source.
-const CRM_SUBACCOUNTS_BODY = {
-	type: "company",
-	company_id: "oEEb4PRxpIyxEV1LxLea",
-	location_id: "",
-	method: "GET",
-	url: "locations/search?limit=100",
-	data: "",
-	app_id: "69d79fdae05393afc48ea4a3",
-} as const;
-
 // The CRM proxy lives outside the theme-builder namespace on the same host.
 // It also needs a different SSO-Token, so this call bypasses the shared axios
 // instance (whose interceptor would overwrite SSO-Token with the theme-builder
 // value) and goes out via raw axios with the headers spelled out below.
+//
+// `company_id` / `app_id` for the request body come from the live GHL context
+// (ghlContextAtom) — see useSubaccounts below — not from hardcoded constants.
 const CRM_SSO_TOKEN =
 	"U2FsdGVkX1/LS56wm3iXnP55YZRpQsgdI3EKkkbi9mSYbRIk0qHfnRWh6zsBnjitljha/LENAPy6VY1xi06PObqYBUtZDdx7PxpPkXmvdWQyX2/3lu6wC9yAP5+rtCb+vPXAhv7WL9mtZEl3mlyHVjejw7AFLBnFozYtwYka1nAeKsZY6wQ+s60vGqdg16gKAg5yliP/z70vcXyhAVZ107VFR57XQJmk2CECSYqBUO/LPkzXAOtXvVBNXc/5jkChQSZuq8Uz+N/mPyKNhaBCXrWDdUqxGXE2RbXq0TwQenQIg0oNDOrFk6tGST54kuabNE3lVgd1hXRsH1/h9c5bptInScJ8vV/mAIDBFBzCcHE06+RueDC+fcf6V3ridwqyuzRzctG/w1JYaUSm+9JXguI6iKsqwt+YZNmkUuc24ESLiiSGuhcCtLTQm2Xj3cqXUEq53k/R67MaHGyg2WbzfSggEVQ26pztbOo2VJ2RTmIQQsZJoeU3ltYbAW9hL9PeFT0TJrlFLKfhrxtNbtvFoZ7gIEnJ8fK25W4f6a1/k4U6MOPS/jnvhqAg04jJiTKXge++vep8aKoiruOObZcWKcjcXuKJs4YQni3M0CzxW8L8Av7pUBNHgJvOw2ocYvow";
 	// "U2FsdGVkX18yiat00Xm5IRoB4xDkJfrWxb0smULkODR+XV1PJv1V/yOjEDhq1JPgDQ8vpwWA4BXI0qrj/1zlHwfYTIUrDUL2hQNKAndizxVNPbF+x06H7ixeZdfzplnPgWmdidJ1ZXIjyhTRZX4adeliXNmexnQZAAHYQBWp52pCoFobN3q4e4/2DzY5XsrfZzfT2F/VIXkTDfU2fpL/0BOitl1Ck8udCeKwiAYmLuNTK17rR0s4XBsg09+xZROGtql/Yn7iITLorQV/sbtShwlNY/X0E6fbTM/vqDprE7Vs+3DQd8zoDTdeBrE+q6EEui4dI6RNYzCuRMGv4cbDM7Abhpv2UO0MV/FTCBi07Hd/Yfxhb82sH14kvhy4xiIJSgC3C/1puiiciBgar876wneMeqgfGkx8kqEc1y8aKuLroQ28YQ1JnKHaG8f9WHSH7r2OLMySYVXeBykPAR7EMO0A5XPV5Mht2pLVHtd30W9613BGc5eV3VwvuMwQxq3UH4NFI/0fuQuouCr/X8DBuBpw8i19/BxZ4txRYLD59TCRSBIj+cH0qGj9AoY1WyGwyOAUXVgVB3l4yzPfgCOEObUFZv2RcyefqQNB9tAkD4e5CqYzqGGRpQVXdp8shKoK"; // for ngrok link
 
 
 export const useSubaccounts = () => {
+	// company_id / app_id come from the live GHL SSO context. Out of the GHL
+	// iframe these are the appHeaders dev fallbacks; inside it they're the
+	// real per-user values from the postMessage handshake.
+	const ghl = useRecoilValue(ghlContextAtom);
+
 	const { data, isLoading, isFetching, error } = useQuery<Subaccount[], Error>(
-		["subaccounts"],
+		["subaccounts", ghl.companyId, ghl.appId],
 		async () => {
 			try {
-				const res = await axios.post(CRM_HANDLER_URL, CRM_SUBACCOUNTS_BODY, {
+				const body = {
+					type: "company",
+					company_id: ghl.companyId,
+					location_id: "",
+					method: "GET",
+					url: "locations/search?limit=100",
+					data: "",
+					app_id: ghl.appId,
+				};
+				const res = await axios.post(CRM_HANDLER_URL, body, {
 					headers: {
 						"Content-Type": "application/json",
 						"SSO-Token": CRM_SSO_TOKEN,
-						"APP-KEY": APP_KEY,
+						"APP-KEY": ghl.appKey,
 					},
 				});
 				const locations: any[] = res.data?.data?.locations ?? [];

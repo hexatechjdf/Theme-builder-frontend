@@ -8,8 +8,9 @@ const transformToList = (obj: Styles): { [key: string]: string[] } => {
 	const result: { [key: string]: string[] } = {};
 
 	for (const key in obj) {
-		if (obj[key] && typeof obj[key] === "object") {
-			result[key] = Object.keys(obj[key]);
+		const value = obj[key as keyof Styles];
+		if (value && typeof value === "object") {
+			result[key] = Object.keys(value);
 		}
 	}
 

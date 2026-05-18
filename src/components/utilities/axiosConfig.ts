@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from "axios";
-import { SSO_TOKEN, APP_KEY } from "./appHeaders";
+import { getGhlRuntimeContext } from "./ghlRuntimeContext";
 import { API_BASE_URL } from "./apiConfig";
 
 export interface ApiResponse<T> {
@@ -18,8 +18,9 @@ export const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use((config) => {
 	config.headers = config.headers || {};
-	config.headers["SSO-Token"] = SSO_TOKEN;
-	config.headers["APP-KEY"] = APP_KEY;
+	const ghl = getGhlRuntimeContext();
+	config.headers["SSO-Token"] = ghl.ssoToken;
+	config.headers["APP-KEY"] = ghl.appKey;
 	const token = localStorage.getItem("token");
 	if (token) {
 		config.headers.Authorization = token;

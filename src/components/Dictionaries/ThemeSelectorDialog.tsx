@@ -53,7 +53,7 @@ interface ThemeSelectorDialogProps {
 // (the brand purple gradient + image-off icon) when the URL is invalid or
 // fails. Inherits all the layout/sizing props passed in so it works for both
 // absolute-positioned card hero images and inline thumbnails.
-const SafeImage: React.FC<ImageProps> = ({ src, alt, ...rest }) => {
+const SafeImage: React.FC<ImageProps> = ({ src, alt, direction: _direction, ...rest }) => {
     const [errored, setErrored] = useState(false);
     const hasSrc = typeof src === 'string' && src.trim().length > 0;
 
