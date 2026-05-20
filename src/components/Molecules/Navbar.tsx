@@ -1,14 +1,15 @@
-import { Box, Flex, Tabs, Text } from "@chakra-ui/react";
+import { Box, Flex, Image, Tabs } from "@chakra-ui/react";
 import { LuLayoutDashboard } from "react-icons/lu";
 import { AiOutlineLogin } from "react-icons/ai";
 import { TbLoader3 } from "react-icons/tb";
 import { FaCode } from "react-icons/fa6";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, type To } from "react-router-dom";
 import { useEffect, useState } from "react";
 import PublishMene from "./PublishMenu";
 import Profile from "../Orginisms/Profile";
 import LevelSwitcher from "./LevelSwitcher";
-import PublishStatusBadge from "./PublishStatusBadge";
+import SaveStatusIndicator from "./SaveStatusIndicator";
+import { useNavigationGuard } from "../Layouts/NavigationGuard";
 
 
 type TabValue = "themeCustomize" | "loginTheme" | "loaderAnimations" | "customCss";
@@ -23,15 +24,24 @@ const TAB_PATHS: Record<TabValue, string> = {
 const StickyNavbar: React.FC = () => {
 	const navigate = useNavigate();
 	const [searchParams] = useSearchParams();
+	const { guardedNavigate } = useNavigationGuard();
 
 	const [selectedTab, setSelectedTab] = useState<TabValue>("themeCustomize");
 
-	const naviagteTabTo = (tab: TabValue) => {
+	// Router target for a tab, preserving the current query string (the GHL
+	// iframe passes session context via the URL).
+	const targetFor = (tab: TabValue): To => {
 		const path = TAB_PATHS[tab] ?? TAB_PATHS.themeCustomize;
 		const search = searchParams.toString();
-		navigate({ pathname: path, search: search ? `?${search}` : "" });
+		return { pathname: path, search: search ? `?${search}` : "" };
 	};
 
+	// Reflect + persist the active tab — called only once a navigation has
+	// actually been committed (see handleTabChange).
+	const commitTab = (tab: TabValue) => {
+		setSelectedTab(tab);
+		localStorage.setItem("selectedTab", tab);
+	};
 
 	useEffect(() => {
 		const validTabs: TabValue[] = ["themeCustomize", "loginTheme", "loaderAnimations", "customCss"];
@@ -39,17 +49,19 @@ const StickyNavbar: React.FC = () => {
 		const initial: TabValue = validTabs.includes(storedTab) ? storedTab : "themeCustomize";
 		setSelectedTab(initial);
 		localStorage.setItem("selectedTab", initial);
-		naviagteTabTo(initial);
+		// Mount redirect — not a user-initiated "leave", so it bypasses the
+		// unsaved-changes guard (changedList is empty on boot anyway).
+		navigate(targetFor(initial));
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
-
-
 
 	const handleTabChange = (details: { value: string }) => {
 		const value = details.value as TabValue;
-		setSelectedTab(value);
-		localStorage.setItem("selectedTab", value);
-		naviagteTabTo(value)
-
+		if (value === selectedTab) return;
+		// Guard BEFORE touching tab state: Tabs.Root is controlled by
+		// `selectedTab`, so if the user cancels the leave the tab stays put.
+		// `commitTab` runs only when the navigation is actually committed.
+		guardedNavigate(targetFor(value), () => commitTab(value));
 	};
 
 	return (
@@ -74,18 +86,24 @@ const StickyNavbar: React.FC = () => {
 				justify="space-between"
 				gap={2}
 			>
-				<Link to="/dashboard">
-					<Text
-						fontSize={{ base: "md", md: "xl" }}
-						color="white"
-						fontWeight="bold"
-					>
-						Theme Builder
-					</Text>
-				</Link>
+				<Image
+					src="https://msgsndr-private.storage.googleapis.com/companyPhotos/79702884-fc35-45c4-abe7-39720fd41b72.png"
+					alt="Theme Builder"
+					h={{ base: "60px", md: "60px" }}
+					w="auto"
+					maxW={{ base: "150px", md: "220px" }}
+					objectFit="contain"
+					cursor="pointer"
+					flexShrink={0}
+					onClick={() =>
+						guardedNavigate(targetFor("themeCustomize"), () =>
+							commitTab("themeCustomize"),
+						)
+					}
+				/>
 				<Flex gap={{ base: 2, md: 3 }} align="center">
 					<Profile />
-					<PublishStatusBadge />
+					<SaveStatusIndicator />
 					<PublishMene />
 				</Flex>
 			</Flex>

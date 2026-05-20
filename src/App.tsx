@@ -7,11 +7,19 @@ import ReactQueryProvider from "./ReactQueryProvider";
 import { ToastContainer } from "react-toastify";
 import { ContextProvider } from "./components/context/CustomAttributeContextApi";
 import GHLSSOProvider from "./components/Auth/GHLSSOProvider";
+
+// The app is served under a sub-path (vite.config.ts `base`, e.g.
+// `/theme-customizer/`). React Router must match routes with that SAME
+// prefix as its `basename`, or every route 404s on a sub-path host.
+// `import.meta.env.BASE_URL` is whatever Vite's `base` is set to, so this
+// stays correct in dev, at the sub-path, and at root ("/") alike.
+const ROUTER_BASENAME = import.meta.env.BASE_URL.replace(/\/$/, "") || "/";
+
 const App: React.FC = () => {
 	return (
 		<ContextProvider>
 			<ReactQueryProvider>
-				<Router>
+				<Router basename={ROUTER_BASENAME}>
 					<RecoilRoot>
 						<ChakraProvider>
 							  {/* <ThemeLoader /> */}

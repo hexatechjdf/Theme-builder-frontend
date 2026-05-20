@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Box, Text, Flex } from "@chakra-ui/react";
 import ThemePresetMenu from "../Atoms/ThemePresetMenu";
 import { UseAllValues } from "../utilities/GetAllValues";
@@ -49,6 +49,10 @@ const Dashboard = () => {
 	const [selectedTheme, setSelectedTheme] = useRecoilState(
 		selectedThemeFamily({ themeType: "dashboard", locationId: currentLocationId })
 	);
+
+	// Controlled open state for the theme picker — lets the empty-state
+	// "Select Theme" button open the same dialog as the toolbar trigger.
+	const [pickerOpen, setPickerOpen] = useState(false);
 
 	// Hydrate the per-location atom from the backend's inherited
 	// dashboard_id when this slot has never been picked. Without this, a
@@ -165,13 +169,15 @@ const Dashboard = () => {
 						isLoading={isDefaultLoading}
 						apiError={defaultError?.message || ""}
 						themeType="dashboard"
+						open={pickerOpen}
+						onOpenChange={setPickerOpen}
 					/>
 				</Flex>
 				<UseAllValues section="theme" sections={sections} />
 			</Flex>
 
 			{!themeUuid ? (
-				<NoThemeSelectedState />
+				<NoThemeSelectedState onSelectTheme={() => setPickerOpen(true)} />
 			) : isSchemaLoading || !isHydrated ? (
 				// Wait for BOTH the schema AND the saved-draft hydration before
 				// mounting the field tree. ColorDrawer reads store(id) once on

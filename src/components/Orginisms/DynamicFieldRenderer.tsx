@@ -282,6 +282,48 @@ const FontsField: React.FC<Props> = ({ field }) => {
 	);
 };
 
+// Strips a CSS `url("…")` / url(…) wrapper down to the bare link. Image/URL
+// fields are STORED wrapped (buildRoots emits `url("…")` so admin CSS can
+// drop them straight into `background-image`), but the user should only ever
+// see and edit the plain URL in the field.
+const unwrapUrl = (raw: string): string => {
+	const m = raw.trim().match(/^url\(\s*(['"]?)([\s\S]*?)\1\s*\)$/i);
+	return m ? m[2].trim() : raw;
+};
+
+// `url`-type field. Displays the bare link; the value is stored unwrapped,
+// and buildRoots (GetAllValues) re-wraps it as `url("…")` at save time.
+const UrlInputField: React.FC<Props> = ({ field }) => {
+	const initial = unwrapUrl(
+		String(
+			(store(field.key) as string | undefined) ??
+				field.value ??
+				field.defaultValue ??
+				"",
+		),
+	);
+	const [value, setValue] = useState<string>(initial);
+
+	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const next = e.target.value;
+		setValue(next);
+		store(field.key, next);
+		pushChangedKey(field.key);
+	};
+
+	return (
+		<Field label={field.label}>
+			<Input
+				value={value}
+				onChange={handleChange}
+				placeholder="https://example.com/image.png"
+				variant="outline"
+				minW="50px"
+			/>
+		</Field>
+	);
+};
+
 const DynamicFieldRenderer: React.FC<Props> = ({ field }) => {
 	if (!field?.key) {
 		if (typeof console !== "undefined") {
@@ -328,9 +370,6 @@ const DynamicFieldRenderer: React.FC<Props> = ({ field }) => {
 			);
 
 		case "text":
-		case "url":
-			// `url` shares the text-input UI; the wrap-to-`url("...")` happens
-			// at save time in buildRoots (see GetAllValues).
 			return (
 				<InputField
 					id={field.key}
@@ -339,6 +378,11 @@ const DynamicFieldRenderer: React.FC<Props> = ({ field }) => {
 					type="text"
 				/>
 			);
+
+		case "url":
+			// Image/URL field — shows the bare link. buildRoots re-wraps it
+			// as `url("…")` at save time (see GetAllValues).
+			return <UrlInputField field={field} />;
 
 		case "number":
 			return (

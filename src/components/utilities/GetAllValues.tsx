@@ -5,11 +5,14 @@ import store from "store2";
 import { usePostThemeSetting } from "../services/api";
 import type { DraftThemeResponse } from "../services/api";
 import { useQueryClient } from "react-query";
-import { Spinner } from "@chakra-ui/react";
 import { toast } from "react-toastify";
 import { selectedThemeFamily } from "../Atoms/selectedThemeState";
 import { publishStatusAtom } from "../Atoms/publishStatus";
+import { saveActivityAtom } from "../Atoms/saveActivityAtom";
+import { lastSavedAtAtom } from "../Atoms/lastSavedAtAtom";
 import { levelModeAtom } from "../Atoms/levelMode";
+import { useChangedList } from "../hooks/useChangedList";
+import { notifyChangedListChanged } from "../store/changedListStore";
 import { normalizeToFormat, wrapWithFormat } from "./formatColor";
 import type { SchemaField, SchemaSection } from "../Dictionaries/themeSchema";
 import {
@@ -72,6 +75,10 @@ export const UseAllValues = ({ section, sections }: UseAllValuesProps) => {
 	const { mutate, isLoading } = usePostThemeSetting();
 	const queryClient = useQueryClient();
 	const setPublishStatus = useSetRecoilState(publishStatusAtom);
+	const setSaveActivity = useSetRecoilState(saveActivityAtom);
+	const setLastSavedAt = useSetRecoilState(lastSavedAtAtom);
+	// Reactive view of `changedList` — drives the save button's enabled state.
+	const { hasChanges } = useChangedList();
 
 	/* ─────── Link-propagation dialog state ─────── */
 	const [dialogOpen, setDialogOpen] = useState(false);
@@ -188,11 +195,16 @@ export const UseAllValues = ({ section, sections }: UseAllValuesProps) => {
 			};
 		}
 
+		setSaveActivity("saving");
 		try {
 			await mutate(payload, {
 				onSuccess: () => {
-					toast.success("Saved as draft — click Publish to push live");
+					toast.success("Saved as draft. Click Publish to push live");
 					store("changedList", []);
+					// Push the cleared list to subscribers (navbar indicator,
+					// leave-guard, save button) without waiting for the poll.
+					notifyChangedListChanged();
+					setLastSavedAt(Date.now());
 					setPublishStatus("draft");
 					// Invalidate every variant — react-query treats keys as a
 					// prefix match when you pass the partial key, so this also
@@ -206,8 +218,12 @@ export const UseAllValues = ({ section, sections }: UseAllValuesProps) => {
 							: "Failed to update theme. Please try again."
 					);
 				},
+				onSettled: () => {
+					setSaveActivity("idle");
+				},
 			});
 		} catch (err) {
+			setSaveActivity("idle");
 			toast.error("An unexpected error occurred");
 			console.error("Error posting theme:", err);
 		}
@@ -378,22 +394,27 @@ export const UseAllValues = ({ section, sections }: UseAllValuesProps) => {
 		setPendingGroups([]);
 	};
 
+	// Theme/Login saves require at least one edit. The loader save is gated
+	// separately (on whether a loader is picked) inside runMutation, so its
+	// button must stay enabled even with an empty changedList.
+	const cleanDisabled =
+		(section === "theme" || section === "login") && !hasChanges;
+
 	return (
 		<>
 			<Button
 				onClick={postValue}
 				size="sm"
-				disabled={isLoading}
+				loading={isLoading}
+				loadingText="Saving…"
+				disabled={cleanDisabled}
 				flexShrink={0}
+				transition="opacity 0.2s ease, background-color 0.2s ease"
+				title={
+					cleanDisabled ? "Make a change to enable saving" : undefined
+				}
 			>
-				{isLoading ? (
-					<>
-						<Spinner size="sm" mr={2} />
-						Saving…
-					</>
-				) : (
-					"Apply Changes"
-				)}
+				Apply Changes
 			</Button>
 			<LinkPropagationDialog
 				open={dialogOpen}

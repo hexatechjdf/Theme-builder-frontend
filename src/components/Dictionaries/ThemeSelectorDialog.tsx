@@ -15,7 +15,7 @@ import {
     Stack,
     Text,
 } from '@chakra-ui/react';
-import { LuCheck, LuImageOff, LuLayoutGrid, LuSearch, LuSparkles } from 'react-icons/lu';
+import { LuCheck, LuChevronDown, LuImageOff, LuLayoutGrid, LuSearch, LuSparkles } from 'react-icons/lu';
 import { CloseButton } from '../ui/close-button';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { toast } from 'react-toastify';
@@ -47,6 +47,11 @@ interface ThemeSelectorDialogProps {
     // Scope for the selection: "dashboard" tab and "login" tab keep separate
     // selections. Each writes/reads its own slot in the selectedThemeFamily.
     themeType: ThemeType;
+    // Optional controlled open state. When provided, the parent owns the
+    // dialog's visibility — so a separate button (e.g. the empty-state
+    // "Select Theme" CTA) can open the same dialog. Omit for self-managed.
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
 }
 
 // Renders a real <Image> when src loads, swaps to a gradient placeholder
@@ -81,6 +86,8 @@ const ThemeSelectorDialog: React.FC<ThemeSelectorDialogProps> = ({
     isLoading = false,
     apiError = '',
     themeType,
+    open,
+    onOpenChange,
 }) => {
     // Per-location selection: agency and each subaccount keep independent
     // theme picks, so switching the Level Switcher doesn't bleed one level's
@@ -94,19 +101,17 @@ const ThemeSelectorDialog: React.FC<ThemeSelectorDialogProps> = ({
         selectedThemeFamily({ themeType, locationId: currentLocationId })
     );
     const [isOpen, setIsOpen] = useState(false);
+
+    // Use the controlled `open` when the parent passes it, otherwise the
+    // internal `isOpen`. `setOpen` routes writes to whichever owns the state.
+    const dialogOpen = open !== undefined ? open : isOpen;
+    const setOpen = (next: boolean) => {
+        if (onOpenChange) onOpenChange(next);
+        else setIsOpen(next);
+    };
     const [fullscreenPreview, setFullscreenPreview] = useState<Theme | null>(null);
     const [activeImgIdx, setActiveImgIdx] = useState(0);
     const [searchQuery, setSearchQuery] = useState('');
-
-    useEffect(() => {
-        const sid = getThemeId(selectedTheme);
-        if (sid) {
-            const data = (store("changedList") as string[]) || [];
-            if (!data.includes(sid)) {
-                store("changedList", [...data, sid]);
-            }
-        }
-    }, [selectedTheme]);
 
     const filteredThemes = useMemo(() => {
         const q = searchQuery.trim().toLowerCase();
@@ -136,14 +141,23 @@ const ThemeSelectorDialog: React.FC<ThemeSelectorDialogProps> = ({
         const picked = fullscreenPreview;
         try {
             setSelectedTheme(picked);
+            // Mark the theme switch as an unsaved change HERE — on the user's
+            // explicit pick. Previously a [selectedTheme] effect did this, but
+            // it also fired on mount/hydration, so every freshly-loaded page
+            // looked dirty and the leave-page guard fired with no real edit.
+            const sid = getThemeId(picked);
+            if (sid) {
+                const data = (store("changedList") as string[]) || [];
+                if (!data.includes(sid)) {
+                    store("changedList", [...data, sid]);
+                }
+            }
             // Recoil's store2Effect persists under selectedTheme:<type>.
             // Close BOTH dialogs — preview AND the underlying library list.
-            // Previously only the preview closed, leaving the user staring at
-            // the library grid with their pick already made.
             setFullscreenPreview(null);
-            setIsOpen(false);
+            setOpen(false);
             toast.success(
-                `"${picked.title}" applied — click Apply Changes to save`
+                `"${picked.title}" applied. Click Apply Changes to save`
             );
         } catch (err) {
             console.error('Apply theme failed:', err);
@@ -151,7 +165,6 @@ const ThemeSelectorDialog: React.FC<ThemeSelectorDialogProps> = ({
         }
     };
 
-    const triggerLabel = selectedTheme ? selectedTheme.title : label;
     const triggerImage = selectedTheme?.image?.split(',')[0] ?? '';
 
     return (
@@ -160,35 +173,75 @@ const ThemeSelectorDialog: React.FC<ThemeSelectorDialogProps> = ({
                 size="cover"
                 placement="center"
                 motionPreset="slide-in-bottom"
-                open={isOpen}
-                onOpenChange={(d) => setIsOpen(d.open)}
+                open={dialogOpen}
+                onOpenChange={(d) => setOpen(d.open)}
             >
                 <GetUserCustomTheme theme={selectedTheme} />
                 <Dialog.Trigger asChild>
                     <Button
                         variant="outline"
                         size="sm"
+                        h="auto"
+                        minH="38px"
+                        py={1.5}
                         px={3}
-                        py={5}
-                        onClick={() => setIsOpen(true)}
+                        gap={2}
+                        borderWidth="1px"
+                        borderColor={selectedTheme ? 'gray.300' : '#735DFF'}
+                        color={selectedTheme ? 'gray.800' : '#735DFF'}
+                        bg={selectedTheme ? 'white' : 'rgba(115, 93, 255, 0.06)'}
+                        _hover={{
+                            borderColor: '#735DFF',
+                            bg: 'rgba(115, 93, 255, 0.08)',
+                        }}
+                        transition="border-color 0.15s, background-color 0.15s"
+                        onClick={() => setOpen(true)}
                     >
                         {!selectedTheme ? (
-                            triggerLabel
+                            // Empty state — an accent-tinted CTA with a grid
+                            // icon + chevron so it clearly reads as "pick a
+                            // theme here", not a passive label.
+                            <>
+                                <LuLayoutGrid size={16} />
+                                <Text fontSize="sm" fontWeight="semibold">
+                                    {label}
+                                </Text>
+                                <LuChevronDown size={15} />
+                            </>
                         ) : (
-                            <Flex align="center" gap={2}>
-                                <Box position="relative" boxSize="30px" rounded="md" overflow="hidden" bg="gray.100">
+                            // Selected — thumbnail + title, plus a "Change"
+                            // hint and chevron so it's obviously re-clickable.
+                            <>
+                                <Box
+                                    boxSize="28px"
+                                    rounded="md"
+                                    overflow="hidden"
+                                    bg="gray.100"
+                                    flexShrink={0}
+                                >
                                     <SafeImage
                                         src={triggerImage}
                                         alt={selectedTheme.title}
-                                        boxSize="30px"
+                                        boxSize="28px"
                                         rounded="md"
                                         objectFit="cover"
                                     />
                                 </Box>
-                                <Text fontSize="sm" truncate maxW="160px">
+                                <Text fontSize="sm" fontWeight="medium" truncate maxW="150px">
                                     {selectedTheme.title}
                                 </Text>
-                            </Flex>
+                                <Text
+                                    fontSize="2xs"
+                                    fontWeight="bold"
+                                    textTransform="uppercase"
+                                    letterSpacing="wide"
+                                    color="gray.400"
+                                    display={{ base: 'none', md: 'inline' }}
+                                >
+                                    Change Theme
+                                </Text>
+                                <LuChevronDown size={15} />
+                            </>
                         )}
                     </Button>
                 </Dialog.Trigger>

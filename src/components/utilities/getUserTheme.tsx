@@ -9,17 +9,15 @@ import UpdateRecoilNumericState from "./UpdateRecoileNumericState";
 interface ThemeSchema {
   theme?: any;
 }
+// Hydrates a CSS-variable value from the backend theme into store2. This is
+// a LOAD, not a user edit — it must NOT touch `changedList`. Pushing keys
+// here made every freshly-loaded page look dirty (spurious "unsaved changes"
+// + the leave-page guard firing with no real edit). `changedList` is seeded
+// only by genuine field-editor interactions.
 function updateThemeValue(key: string, value: string) {
   const existing = store(key);
   if (existing !== value) {
-    store(key, value); //storeTessting
-
-    // Maintain unique changed keys
-  }
-  const changedList = store("changedList") || [];
-  if (!changedList.includes(key)) {
-    changedList.push(key);
-    store("changedList", changedList);
+    store(key, value);
   }
 }
 

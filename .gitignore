@@ -12,6 +12,13 @@ dist
 dist-ssr
 *.local
 
+# Environment variables — only the .env.example template is committed.
+# Real .env files hold per-environment config and (for VITE_ vars) get
+# inlined into the client bundle at build time — keep them out of git.
+.env
+.env.*
+!.env.example
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
