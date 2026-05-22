@@ -23,183 +23,29 @@ import {
 	getSubaccountById,
 	levelModeAtom,
 	SUBACCOUNT_PARAM,
-	Subaccount,
 } from "../Atoms/levelMode";
 import { useSubaccounts } from "../services/api";
 
-interface SubaccountPickerProps {
-	selectedId: string | null;
-	onSelect: (id: string) => void;
-	subaccounts: Subaccount[];
-	isLoading: boolean;
-	error: Error | null;
-}
-
-const SubaccountPicker: React.FC<SubaccountPickerProps> = ({
-	selectedId,
-	onSelect,
-	subaccounts,
-	isLoading,
-	error,
-}) => {
-	const [open, setOpen] = useState(false);
-	const [search, setSearch] = useState("");
-	const inputRef = useRef<HTMLInputElement>(null);
-
-	const selected = getSubaccountById(selectedId, subaccounts);
-	const buttonLabel = selected?.name ?? selectedId ?? "Select subaccount";
-
-	// Focus the search input when the popover opens; clear search when it closes.
-	useEffect(() => {
-		if (open) {
-			requestAnimationFrame(() => inputRef.current?.focus());
-		} else {
-			setSearch("");
-		}
-	}, [open]);
-
-	const filtered = useMemo(() => {
-		const q = search.trim().toLowerCase();
-		if (!q) return subaccounts;
-		return subaccounts.filter(
-			(s) =>
-				s.name.toLowerCase().includes(q) || s.id.toLowerCase().includes(q)
-		);
-	}, [search, subaccounts]);
-
-	const pick = (sub: Subaccount) => {
-		onSelect(sub.id);
-		setOpen(false);
-	};
-
-	return (
-		<PopoverRoot
-			open={open}
-			onOpenChange={(e) => setOpen(e.open)}
-			positioning={{ placement: "bottom-start", gutter: 4 }}
-			initialFocusEl={() => inputRef.current}
-		>
-			<PopoverTrigger asChild>
-				<Button
-					size="xs"
-					variant="outline"
-					borderRadius="full"
-					borderColor="gray.300"
-					color="gray.700"
-					_hover={{ bg: "gray.50" }}
-					maxW={{ base: "140px", sm: "180px", md: "240px" }}
-					gap={1.5}
-					px={3}
-					aria-label="Select subaccount"
-				>
-					<LuUser />
-					<Text as="span" truncate fontSize="xs" fontWeight="semibold">
-						{buttonLabel}
-					</Text>
-					<LuChevronDown />
-				</Button>
-			</PopoverTrigger>
-
-			<PopoverContent
-				width={{ base: "260px", md: "300px" }}
-				maxW="calc(100vw - 32px)"
-				p={0}
-				borderRadius="md"
-				boxShadow="lg"
-				border="1px solid"
-				borderColor="gray.200"
-				overflow="hidden"
-			>
-				<PopoverBody p={0}>
-					<Box p={2} borderBottom="1px solid" borderColor="gray.100">
-						<Input
-							ref={inputRef}
-							size="xs"
-							placeholder="Search subaccounts..."
-							value={search}
-							onChange={(e) => setSearch(e.target.value)}
-							borderColor="gray.200"
-							_focus={{
-								borderColor: "#735DFF",
-								boxShadow: "0 0 0 1px #735DFF",
-							}}
-						/>
-					</Box>
-
-					<Box maxH="260px" overflowY="auto">
-						{isLoading ? (
-							<HStack p={3} fontSize="sm" color="gray.500" justify="center" gap={2}>
-								<Spinner size="xs" />
-								<Text as="span">Loading subaccounts…</Text>
-							</HStack>
-						) : error ? (
-							<Box p={3} fontSize="sm" color="red.500" textAlign="center">
-								Failed to load subaccounts
-							</Box>
-						) : subaccounts.length === 0 ? (
-							<Box p={3} fontSize="sm" color="gray.500" textAlign="center">
-								No subaccounts found
-							</Box>
-						) : filtered.length === 0 ? (
-							<Box p={3} fontSize="sm" color="gray.500" textAlign="center">
-								No subaccounts match
-							</Box>
-						) : (
-							filtered.map((sub) => {
-								const isActive = sub.id === selectedId;
-								return (
-									<Box
-										key={sub.id}
-										onClick={() => pick(sub)}
-										role="button"
-										cursor="pointer"
-										px={3}
-										py={2}
-										bg={isActive ? "purple.50" : "transparent"}
-										_hover={{ bg: isActive ? "purple.100" : "gray.50" }}
-										display="flex"
-										justifyContent="space-between"
-										alignItems="center"
-										gap={2}
-									>
-										<Stack gap={0} minW={0} flex={1}>
-											<Text
-												fontSize="sm"
-												fontWeight={isActive ? "semibold" : "medium"}
-												color="gray.800"
-												truncate
-											>
-												{sub.name}
-											</Text>
-											<Text
-												fontSize="xs"
-												color="gray.500"
-												fontFamily="mono"
-												truncate
-											>
-												{sub.id}
-											</Text>
-										</Stack>
-										{isActive && (
-											<Box color="#735DFF" flexShrink={0}>
-												<LuCheck />
-											</Box>
-										)}
-									</Box>
-								);
-							})
-						)}
-					</Box>
-				</PopoverBody>
-			</PopoverContent>
-		</PopoverRoot>
-	);
-};
-
+/*
+ * Scope selector — a single compact dropdown that replaces the old
+ * segmented toggle + separate subaccount picker.
+ *
+ * Why one control: the toggle + picker + the navbar's other actions could
+ * not all fit on small screens, and the icon-only toggle didn't convey its
+ * purpose. A single button that shows the CURRENT scope by name ("Agency" or
+ * the subaccount name) with a chevron is unambiguous and stays compact at any
+ * width. Opening it reveals the Agency option + a searchable subaccount list.
+ *
+ * All level/URL logic is unchanged — only the presentation is consolidated.
+ */
 const LevelSwitcher = () => {
 	const [searchParams, setSearchParams] = useSearchParams();
 	const [level, setLevel] = useRecoilState(levelModeAtom);
 	const { subaccounts, isLoading, error } = useSubaccounts();
+
+	const [open, setOpen] = useState(false);
+	const [search, setSearch] = useState("");
+	const inputRef = useRef<HTMLInputElement>(null);
 
 	// URL → atom (URL is the source of truth). Param PRESENCE (not value) marks
 	// subaccount mode — so we can enter the mode before the list has loaded.
@@ -235,8 +81,8 @@ const LevelSwitcher = () => {
 	};
 
 	// Once subaccounts arrive, if the user is in subaccount mode without an id
-	// (e.g. they clicked the toggle while the list was still loading), pick the
-	// first subaccount automatically.
+	// (e.g. they switched while the list was still loading), pick the first
+	// subaccount automatically.
 	useEffect(() => {
 		if (level.mode !== "subaccount") return;
 		if (level.subaccountId) return;
@@ -247,62 +93,243 @@ const LevelSwitcher = () => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [level.mode, level.subaccountId, subaccounts]);
 
-	const pill = (active: boolean) => ({
-		size: "xs" as const,
-		bg: active ? "#735DFF" : "transparent",
-		color: active ? "white" : "gray.600",
-		_hover: {
-			bg: active ? "#5b48d9" : "gray.200",
-		},
-		borderRadius: "full",
-		px: { base: 2, sm: 3 },
-		fontWeight: "semibold" as const,
-		fontSize: "xs" as const,
-		minW: { base: "32px", sm: "auto" },
-	});
+	// Focus the search input when the popover opens; clear search when it closes.
+	useEffect(() => {
+		if (open) {
+			requestAnimationFrame(() => inputRef.current?.focus());
+		} else {
+			setSearch("");
+		}
+	}, [open]);
+
+	const filtered = useMemo(() => {
+		const q = search.trim().toLowerCase();
+		if (!q) return subaccounts;
+		return subaccounts.filter(
+			(s) =>
+				s.name.toLowerCase().includes(q) || s.id.toLowerCase().includes(q)
+		);
+	}, [search, subaccounts]);
+
+	const isAgency = level.mode === "agency";
+	const selectedSub = getSubaccountById(level.subaccountId, subaccounts);
+	// What the trigger button shows — the CURRENT scope, named.
+	const triggerLabel = isAgency
+		? "Agency"
+		: selectedSub?.name ?? level.subaccountId ?? "Subaccount";
+
+	const chooseAgency = () => {
+		writeMode("agency");
+		setOpen(false);
+	};
+	const chooseSubaccount = (id: string) => {
+		writeMode("subaccount", id);
+		setOpen(false);
+	};
 
 	return (
-		<HStack gap={2} align="center" flexShrink={0}>
-			<HStack
-				bg="gray.100"
-				borderRadius="full"
-				p="3px"
-				gap="2px"
+		<PopoverRoot
+			open={open}
+			onOpenChange={(e) => setOpen(e.open)}
+			positioning={{ placement: "bottom-end", gutter: 6 }}
+			initialFocusEl={() => inputRef.current}
+		>
+			<PopoverTrigger asChild>
+				<Button
+					size="sm"
+					variant="outline"
+					h="36px"
+					px={3}
+					gap={2}
+					minW={0}
+					maxW={{ base: "150px", sm: "190px", md: "220px" }}
+					borderRadius="full"
+					borderColor="gray.300"
+					bg="white"
+					color="ink.700"
+					_hover={{ bg: "gray.50", borderColor: "gray.400" }}
+					aria-label="Switch level or subaccount"
+					flexShrink={1}
+				>
+					<Box color={isAgency ? "ink.500" : "brand.600"} flexShrink={0}>
+						{isAgency ? <LuBuilding2 /> : <LuUser />}
+					</Box>
+					<Text as="span" truncate fontSize="sm" fontWeight="semibold">
+						{triggerLabel}
+					</Text>
+					<Box flexShrink={0} color="ink.400">
+						<LuChevronDown />
+					</Box>
+				</Button>
+			</PopoverTrigger>
+
+			<PopoverContent
+				width={{ base: "240px", md: "300px" }}
+				maxW="calc(100vw - 20px)"
+				p={0}
+				borderRadius="xl"
+				boxShadow="lg"
 				border="1px solid"
 				borderColor="gray.200"
+				overflow="hidden"
 			>
-				<Button
-					{...pill(level.mode === "agency")}
-					onClick={() => writeMode("agency")}
-					aria-label="Switch to Agency level"
-				>
-					<LuBuilding2 />
-					<Text as="span" display={{ base: "none", sm: "inline" }} ml={1.5}>
-						Agency
-					</Text>
-				</Button>
-				<Button
-					{...pill(level.mode === "subaccount")}
-					onClick={() => writeMode("subaccount")}
-					aria-label="Switch to Subaccount level"
-				>
-					<LuUser />
-					<Text as="span" display={{ base: "none", sm: "inline" }} ml={1.5}>
-						Subaccount
-					</Text>
-				</Button>
-			</HStack>
+				<PopoverBody p={0}>
+					{/* Level: Agency */}
+					<Box px={3} pt={3} pb={2}>
+						<Text
+							fontSize="2xs"
+							textTransform="uppercase"
+							letterSpacing="wider"
+							color="ink.400"
+							fontWeight="bold"
+							mb={1.5}
+							px={1}
+						>
+							Level
+						</Text>
+						<Box
+							role="button"
+							onClick={chooseAgency}
+							cursor="pointer"
+							px={2.5}
+							py={2}
+							borderRadius="lg"
+							bg={isAgency ? "brand.50" : "transparent"}
+							_hover={{ bg: isAgency ? "brand.100" : "gray.50" }}
+							display="flex"
+							alignItems="center"
+							gap={2.5}
+						>
+							<Box color={isAgency ? "brand.600" : "ink.500"} flexShrink={0}>
+								<LuBuilding2 />
+							</Box>
+							<Text
+								flex={1}
+								fontSize="sm"
+								fontWeight={isAgency ? "semibold" : "medium"}
+								color="ink.800"
+							>
+								Switch to Agency
+							</Text>
+							{isAgency && (
+								<Box color="brand.600" flexShrink={0}>
+									<LuCheck />
+								</Box>
+							)}
+						</Box>
+					</Box>
 
-			{level.mode === "subaccount" && (
-				<SubaccountPicker
-					selectedId={level.subaccountId}
-					onSelect={(id) => writeMode("subaccount", id)}
-					subaccounts={subaccounts}
-					isLoading={isLoading}
-					error={error as Error | null}
-				/>
-			)}
-		</HStack>
+					{/* Subaccounts */}
+					<Box
+						px={3}
+						pt={1.5}
+						pb={2}
+						borderTop="1px solid"
+						borderColor="gray.100"
+					>
+						<Text
+							fontSize="2xs"
+							textTransform="uppercase"
+							letterSpacing="wider"
+							color="ink.400"
+							fontWeight="bold"
+							mb={1.5}
+							px={1}
+						>
+							Subaccount
+						</Text>
+						<Input
+							ref={inputRef}
+							size="xs"
+							placeholder="Search subaccounts…"
+							value={search}
+							onChange={(e) => setSearch(e.target.value)}
+							borderColor="gray.200"
+							borderRadius="lg"
+							_focus={{
+								borderColor: "#4f46e5",
+								boxShadow: "0 0 0 1px #4f46e5",
+							}}
+						/>
+					</Box>
+
+					<Box maxH="240px" overflowY="auto" px={3} pb={3}>
+						{isLoading ? (
+							<HStack p={3} fontSize="sm" color="gray.500" justify="center" gap={2}>
+								<Spinner size="xs" />
+								<Text as="span">Loading subaccounts…</Text>
+							</HStack>
+						) : error ? (
+							<Box p={3} fontSize="sm" color="red.500" textAlign="center">
+								Failed to load subaccounts
+							</Box>
+						) : subaccounts.length === 0 ? (
+							<Box p={3} fontSize="sm" color="gray.500" textAlign="center">
+								No subaccounts found
+							</Box>
+						) : filtered.length === 0 ? (
+							<Box p={3} fontSize="sm" color="gray.500" textAlign="center">
+								No subaccounts match
+							</Box>
+						) : (
+							filtered.map((sub) => {
+								const isActive =
+									!isAgency && sub.id === level.subaccountId;
+								return (
+									<Box
+										key={sub.id}
+										onClick={() => chooseSubaccount(sub.id)}
+										role="button"
+										cursor="pointer"
+										px={2.5}
+										py={2}
+										borderRadius="lg"
+										bg={isActive ? "brand.50" : "transparent"}
+										_hover={{ bg: isActive ? "brand.100" : "gray.50" }}
+										display="flex"
+										justifyContent="space-between"
+										alignItems="center"
+										gap={2}
+									>
+										<HStack gap={2.5} minW={0} flex={1}>
+											<Box
+												color={isActive ? "brand.600" : "ink.400"}
+												flexShrink={0}
+											>
+												<LuUser />
+											</Box>
+											<Stack gap={0} minW={0} flex={1}>
+												<Text
+													fontSize="sm"
+													fontWeight={isActive ? "semibold" : "medium"}
+													color="ink.800"
+													truncate
+												>
+													{sub.name}
+												</Text>
+												<Text
+													fontSize="xs"
+													color="gray.500"
+													fontFamily="mono"
+													truncate
+												>
+													{sub.id}
+												</Text>
+											</Stack>
+										</HStack>
+										{isActive && (
+											<Box color="brand.600" flexShrink={0}>
+												<LuCheck />
+											</Box>
+										)}
+									</Box>
+								);
+							})
+						)}
+					</Box>
+				</PopoverBody>
+			</PopoverContent>
+		</PopoverRoot>
 	);
 };
 

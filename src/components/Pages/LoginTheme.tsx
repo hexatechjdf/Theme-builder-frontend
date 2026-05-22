@@ -1,5 +1,6 @@
-import { Box, Flex, Text } from "@chakra-ui/react";
+import { Flex, Text } from "@chakra-ui/react";
 import { useEffect } from "react";
+import { LuLogIn } from "react-icons/lu";
 import { useRecoilState, useRecoilValue } from "recoil";
 import useUserTheme, {
 	useGetUpdatedUserThemeSetting,
@@ -11,7 +12,10 @@ import SchemaTabs from "../Orginisms/SchemaTabs";
 import { selectedThemeFamily } from "../Atoms/selectedThemeState";
 import { levelModeAtom } from "../Atoms/levelMode";
 import NoThemeSelectedState from "../Atoms/NoThemeSelectedState";
-import LoadingFallback from "../Atoms/LoadingFallbackSpinner";
+import ThemeContentSkeleton from "../Atoms/ThemeContentSkeleton";
+import FeedbackState from "../Atoms/FeedbackState";
+import PageHeader from "../Molecules/PageHeader";
+import StickyActionBar from "../Molecules/StickyActionBar";
 
 const LoginTheme = () => {
 	const { data, isLoading, error } = useUserTheme();
@@ -54,63 +58,83 @@ const LoginTheme = () => {
 		isLoading: isSchemaLoading,
 		error: schemaError,
 	} = useThemeRootSections(themeUuid);
+	// Action toolbar (login-theme picker + Apply Changes) — shown in every
+	// state; rides in the sticky zone with the section tabs once a theme loads.
+	const toolbar = (
+		<Flex
+			mx={{ base: 2, md: 6 }}
+			mt={{ base: 3, md: 4 }}
+			px={{ base: 2.5, md: 4 }}
+			py={{ base: 1.5, md: 2 }}
+			bg="white"
+			border="1px solid"
+			borderColor="ink.300"
+			borderRadius="xl"
+			boxShadow="0 2px 8px -2px rgba(16, 24, 40, 0.14)"
+			gap={{ base: 2, md: 3 }}
+			direction="row"
+			align="center"
+			justify="space-between"
+		>
+			<Flex align="center" gap={2.5} minW={0} flex="1">
+				<Text
+					fontSize="xs"
+					color="ink.500"
+					textTransform="uppercase"
+					letterSpacing="wider"
+					fontWeight="bold"
+					flexShrink={0}
+					display={{ base: "none", sm: "inline" }}
+				>
+					Login Theme
+				</Text>
+				<ThemeSelectorDialog
+					themes={data?.logins || []}
+					label="Select Login Theme"
+					ThemeTitle="Choose Login Theme"
+					isLoading={isLoading}
+					apiError={error?.message || ""}
+					themeType="login"
+				/>
+			</Flex>
+			<UseAllValues section="login" sections={sections} />
+		</Flex>
+	);
+
+	const showTabs =
+		!!themeUuid && !isSchemaLoading && isHydrated && !schemaError;
+
 	return (
 		<>
-			<Flex
-				position="sticky"
-				top={0}
-				zIndex={1}
-				mx={{ base: 2, md: 6 }}
-				px={{ base: 3, md: 4 }}
-				py={2}
-				bg="white"
-				border="1px solid"
-				borderColor="gray.200"
-				borderRadius="md"
-				shadow="xs"
-				gap={3}
-				direction={{ base: "column", sm: "row" }}
-				align={{ base: "stretch", sm: "center" }}
-				justify="space-between"
-			>
-				<Flex align="center" gap={2.5} minW={0}>
-					<Text
-						fontSize="xs"
-						color="gray.500"
-						textTransform="uppercase"
-						letterSpacing="wider"
-						fontWeight="semibold"
-						flexShrink={0}
-						display={{ base: "none", sm: "inline" }}
-					>
-						Login Theme
-					</Text>
-					<ThemeSelectorDialog
-						themes={data?.logins || []}
-						label="Select Login Theme"
-						ThemeTitle="Choose Login Theme"
-						isLoading={isLoading}
-						apiError={error?.message || ""}
-						themeType="login"
-					/>
-				</Flex>
-				<UseAllValues section="login" sections={sections} />
-			</Flex>
+			<PageHeader
+				icon={<LuLogIn size={22} />}
+				title="Login Page Theme"
+				description="Style the login screen your users see colors, background, and branding. Saved as a draft until you publish."
+			/>
 
-			{!themeUuid ? (
-				<NoThemeSelectedState />
-			) : isSchemaLoading || !isHydrated ? (
-				// Wait for BOTH the schema AND the saved-draft hydration before
-				// mounting the field tree — ColorDrawer's mount-time read of
-				// store(id) otherwise locks onto schema defaults when the draft
-				// fetch resolves after the schema fetch.
-				<LoadingFallback />
-			) : schemaError ? (
-				<Box p={6}>
-					<Text color="red.500">{schemaError.message}</Text>
-				</Box>
+			{showTabs ? (
+				<SchemaTabs
+					key={currentLocationId}
+					schema={sections}
+					toolbar={toolbar}
+				/>
 			) : (
-				<SchemaTabs key={currentLocationId} schema={sections} />
+				<>
+					<StickyActionBar>{toolbar}</StickyActionBar>
+					{!themeUuid ? (
+						<NoThemeSelectedState />
+					) : isSchemaLoading || !isHydrated ? (
+						<ThemeContentSkeleton />
+					) : (
+						<FeedbackState
+							title="Couldn't load this theme"
+							description={
+								schemaError?.message ||
+								"Something went wrong while loading the theme settings. Please try again."
+							}
+						/>
+					)}
+				</>
 			)}
 		</>
 	);

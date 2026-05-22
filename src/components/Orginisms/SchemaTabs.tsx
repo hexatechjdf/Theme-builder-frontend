@@ -1,6 +1,7 @@
 import React, { Profiler, useEffect, useMemo, useState } from "react";
-import { Box, Tabs } from "@chakra-ui/react";
+import { Flex, Tabs } from "@chakra-ui/react";
 import DynamicSection from "./DynamicSection";
+import StickyActionBar from "../Molecules/StickyActionBar";
 import type { SchemaSection } from "../Dictionaries/themeSchema";
 
 // Toggle to false to silence timing logs in production. Cheap when off.
@@ -28,17 +29,52 @@ interface SchemaTabsProps {
 	schema: SchemaSection[];
 	extraTabs?: ExtraTab[];
 	defaultTabId?: string;
+	// Optional action toolbar (theme picker + Apply Changes) rendered inside
+	// the same sticky zone as the section tabs, so both stay visible while
+	// the user scrolls the field grid.
+	toolbar?: React.ReactNode;
 }
 
+// Smooth, plain cross-fade for the active section. The previous
+// `scale-in/scale-out` made the whole card visibly zoom, and animating the
+// EXIT kept the outgoing panel laid out for a beat — together that read as a
+// glitchy jump. A single gentle fade-in on the incoming panel is clean.
 const tabContentAnim = {
-	_open: { animationName: "fade-in, scale-in", animationDuration: "300ms" },
-	_closed: { animationName: "fade-out, scale-out", animationDuration: "120ms" },
+	_open: {
+		animationName: "fade-in",
+		animationDuration: "200ms",
+		animationTimingFunction: "ease",
+	},
+} as const;
+
+// Shared trigger styling — a segmented "pill" control so the available
+// sections, and which one is active, are unmistakable.
+const triggerStyle = {
+	flexShrink: 0,
+	px: { base: 3, md: 4.5 },
+	py: { base: 1.5, md: 2 },
+	borderRadius: "8px",
+	fontSize: { base: "xs", md: "sm" },
+	fontWeight: "semibold",
+	color: "ink.500",
+	whiteSpace: "nowrap",
+	transition: "color 0.15s ease, background-color 0.15s ease",
+	_hover: { color: "ink.800", bg: "ink.100" },
+	_selected: {
+		bg: "brand.600",
+		color: "white",
+		boxShadow: "0 2px 8px -1px rgba(79, 70, 229, 0.5)",
+		// Flat bottom so the active tab visually attaches to the section
+		// card sitting directly underneath it.
+		borderBottomRadius: 0,
+	},
 } as const;
 
 const SchemaTabs: React.FC<SchemaTabsProps> = ({
 	schema,
 	extraTabs = [],
 	defaultTabId,
+	toolbar,
 }) => {
 	// All valid tab ids in render order — schema tabs first, then extras.
 	const validIds = useMemo(
@@ -64,76 +100,85 @@ const SchemaTabs: React.FC<SchemaTabsProps> = ({
 
 	if (!firstTab) return null;
 
+	// Only show the tab switcher when there's more than one section — a
+	// single-section theme (e.g. just "Base Style") has nothing to switch
+	// between, so the lone tab is noise.
+	const showTabList = validIds.length > 1;
+
 	return (
-		<Box gap={2} mx={{ base: 0, md: 2 }}>
-			<Tabs.Root
-				value={activeTab}
-				onValueChange={(e) => setActiveTab(e.value)}
-				lazyMount
-				unmountOnExit={false}
-			>
-				<Box px={{ base: 2, md: 10 }} my={{ base: 3, md: 5 }}>
+		<Tabs.Root
+			value={activeTab}
+			onValueChange={(e) => setActiveTab(e.value)}
+			variant="plain"
+			lazyMount
+			unmountOnExit={false}
+		>
+			{/* Sticky zone — action toolbar + section switcher stay pinned so
+			    the user can always reach them while scrolling the grid. When the
+			    tab bar is shown, pb=0 so the tabs sit flush on the card; when it
+			    isn't, the default gap keeps the toolbar off the card. */}
+			<StickyActionBar pb={showTabList ? 0 : undefined}>
+				{toolbar}
+				{showTabList && (
+				<Flex
+					justify="flex-start"
+					px={{ base: 2, md: 6 }}
+					mt={toolbar ? { base: 1, md: 2 } : { base: 1, md: 1 }}
+					overflowX="auto"
+					css={{
+						"&::-webkit-scrollbar": { height: "0px" },
+						scrollbarWidth: "none",
+					}}
+				>
 					<Tabs.List
-						width="100%"
-						display="flex"
-						flexWrap={{ base: "nowrap", md: "wrap" }}
-						overflowX={{ base: "auto", md: "visible" }}
-						gap={{ base: 2, md: 1 }}
-						pb={{ base: 1, md: 0 }}
-						css={{
-							"&::-webkit-scrollbar": { height: "4px" },
-							"&::-webkit-scrollbar-thumb": {
-								background: "rgba(0,0,0,0.2)",
-								borderRadius: "2px",
-							},
-						}}
+						display="inline-flex"
+						gap={1}
+						bg="white"
+						border="1px solid"
+						borderColor="ink.300"
+						borderBottomWidth={0}
+						borderRadius="11px 11px 0 0"
+						pt="4px"
+						px="4px"
+						pb={0}
+						boxShadow="0 -1px 4px -1px rgba(16, 24, 40, 0.08)"
 					>
 						{schema.map((s) => (
-							<Tabs.Trigger
-								key={s.id}
-								flexShrink={0}
-								value={s.id}
-								fontSize={{ base: "xs", md: "sm" }}
-								px={{ base: 3, md: 4 }}
-							>
+							<Tabs.Trigger key={s.id} value={s.id} {...triggerStyle}>
 								{s.title}
 							</Tabs.Trigger>
 						))}
 						{extraTabs.map((t) => (
-							<Tabs.Trigger
-								key={t.id}
-								flexShrink={0}
-								value={t.id}
-								fontSize={{ base: "xs", md: "sm" }}
-								px={{ base: 3, md: 4 }}
-							>
+							<Tabs.Trigger key={t.id} value={t.id} {...triggerStyle}>
 								{t.title}
 							</Tabs.Trigger>
 						))}
 					</Tabs.List>
-				</Box>
+				</Flex>
+				)}
+			</StickyActionBar>
 
-				{schema.map((section) => (
-					<Tabs.Content
-						key={section.id}
-						value={section.id}
-						{...tabContentAnim}
-					>
-						<Profiler id={`tab:${section.id}`} onRender={onSectionRender}>
-							<DynamicSection section={section} />
-						</Profiler>
-					</Tabs.Content>
-				))}
+			{schema.map((section) => (
+				<Tabs.Content
+					key={section.id}
+					value={section.id}
+					p={0}
+					{...tabContentAnim}
+				>
+					<Profiler id={`tab:${section.id}`} onRender={onSectionRender}>
+						<DynamicSection section={section} attachedTop={showTabList} />
+					</Profiler>
+				</Tabs.Content>
+			))}
 
-				{extraTabs.map((t) => (
-					<Tabs.Content key={t.id} value={t.id} {...tabContentAnim}>
-						<Profiler id={`tab:${t.id}`} onRender={onSectionRender}>
-							{t.content}
-						</Profiler>
-					</Tabs.Content>
-				))}
-			</Tabs.Root>
-		</Box>
+			{extraTabs.map((t) => (
+				<Tabs.Content key={t.id} value={t.id} p={0} {...tabContentAnim}>
+					<Profiler id={`tab:${t.id}`} onRender={onSectionRender}>
+						{t.content}
+					</Profiler>
+				</Tabs.Content>
+			))}
+		</Tabs.Root>
 	);
 };
 

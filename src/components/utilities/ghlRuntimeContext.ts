@@ -1,4 +1,10 @@
-import { SSO_TOKEN, APP_KEY, APP_ID, DEV_COMPANY_ID } from "./appHeaders";
+import {
+	SSO_TOKEN,
+	APP_KEY,
+	APP_ID,
+	DEV_COMPANY_ID,
+	IS_LOCAL_DEV,
+} from "./appHeaders";
 
 // Module-scope mirror of `ghlContextAtom` for code that can't use Recoil
 // hooks — chiefly the axios request interceptors, which are registered once
@@ -15,12 +21,16 @@ export interface GhlRuntimeContext {
 	appId: string;
 }
 
-// Seeded with the appHeaders fallbacks so any request fired before the SSO
-// handshake settles (or in local dev) still carries valid headers.
+// Seeded so any request fired before the SSO handshake settles still carries
+// headers. On LIVE the token/companyId seed is intentionally EMPTY — the
+// hardcoded dev token must never go out on a real host (GHLSSOProvider gates
+// the app behind a spinner until a real token arrives, so no live request
+// should fire against this seed anyway; the empty seed is the safety net).
+// On local dev we seed the hardcoded values so dev flows work without GHL.
 let current: GhlRuntimeContext = {
-	ssoToken: SSO_TOKEN,
+	ssoToken: IS_LOCAL_DEV ? SSO_TOKEN : "",
 	appKey: APP_KEY,
-	companyId: DEV_COMPANY_ID,
+	companyId: IS_LOCAL_DEV ? DEV_COMPANY_ID : "",
 	locationId: "",
 	appId: APP_ID,
 };

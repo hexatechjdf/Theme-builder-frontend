@@ -23,7 +23,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 		// context. It must sit inside the router (it uses `useNavigate`) —
 		// MainLayout already renders inside <Routes>.
 		<NavigationGuardProvider>
-			<Box h="100vh" display="flex" flexDirection="column">
+			<Box
+				h="100vh"
+				display="flex"
+				flexDirection="column"
+				bg="#e2e4ec"
+				overflow="hidden"
+			>
 				<StickyNavbar />
 
 				{/*
@@ -35,12 +41,23 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 				  navbar stays outside this Fragment so it isn't disturbed.
 				*/}
 				<Fragment key={revertNonce}>
+					{/*
+					  Internal scroll container: flex="1" + minH={0} make this
+					  box (not the page body) the scroller. Sticky children then
+					  pin to the top of THIS box — i.e. flush below the navbar —
+					  instead of colliding with it on a body scroll.
+					*/}
 					<Box
+						flex="1"
+						minH={0}
 						px={{ base: 2, sm: 4, md: 8, lg: 12 }}
-						py={{ base: 4, md: 8, lg: 12 }}
-						mt={4}
+						pt={{ base: 2, md: 4 }}
+						// Extra bottom padding below lg to clear the fixed mobile
+						// bottom nav (hidden at lg+, where normal padding applies).
+						pb={{ base: "84px", lg: 10 }}
 						w="100%"
 						overflowY="auto"
+						colorPalette="brand"
 					>
 						{children}
 					</Box>

@@ -14,7 +14,6 @@ import { useRecoilValue, useResetRecoilState } from "recoil";
 import { useNavigate } from "react-router-dom";
 import { logoutApi } from "../services/auth";
 import { useMutation } from "react-query";
-import userIcon from "../../assets/user.svg";
 
 const Profile = () => {
     const auth = useRecoilValue(authState);
@@ -46,44 +45,48 @@ const Profile = () => {
             <Menu.Trigger asChild>
                 <HStack
                     cursor="pointer"
-                    bg="whiteAlpha.200"
-                    _hover={{ bg: "whiteAlpha.300" }}
+                    bg="white"
+                    _hover={{ bg: "ink.100" }}
                     borderRadius="full"
-                    h="32px"
-                    pl="2px"
-                    pr={{ base: "2px", md: 3 }}
+                    h="36px"
+                    pl="3px"
+                    pr={{ base: "3px", md: 3 }}
                     gap={2}
                     border="1px solid"
-                    borderColor="whiteAlpha.300"
+                    borderColor="ink.200"
                     transition="all 0.2s"
                     flexShrink={0}
                     aria-label="Open profile menu"
                 >
                     {isLoading ? (
-                        <Box w="26px" h="26px" display="flex" alignItems="center" justifyContent="center">
-                            <Spinner size="xs" color="white" />
+                        <Box w="28px" h="28px" display="flex" alignItems="center" justifyContent="center">
+                            <Spinner size="xs" color="brand.500" />
                         </Box>
                     ) : (
-                        <Avatar.Root w="26px" h="26px" border="2px solid" borderColor="whiteAlpha.500">
-                            <Avatar.Fallback>
-                            {userName ? userName.trim().charAt(0).toUpperCase() : "?"}
-                        </Avatar.Fallback>
-                            <Avatar.Image src={userIcon} />
+                        <Avatar.Root
+                            w="28px"
+                            h="28px"
+                            bg="brand.600"
+                            color="white"
+                        >
+                            <Avatar.Fallback fontSize="xs" fontWeight="bold">
+                                {userName ? userName.trim().charAt(0).toUpperCase() : "?"}
+                            </Avatar.Fallback>
                         </Avatar.Root>
                     )}
                     <Text
-                        color="white"
+                        color="ink.800"
                         fontSize="sm"
-                        fontWeight="medium"
-                        display={{ base: "none", md: "inline" }}
+                        fontWeight="semibold"
+                        display={{ base: "none", lg: "inline" }}
                         truncate
                         maxW="120px"
                     >
                         {userName}
                     </Text>
                     <Box
-                        display={{ base: "none", md: "inline-flex" }}
-                        color="whiteAlpha.700"
+                        display={{ base: "none", lg: "inline-flex" }}
+                        color="ink.400"
                         alignItems="center"
                     >
                         <LuChevronDown size={14} />

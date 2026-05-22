@@ -8,6 +8,7 @@ import {
 	ColorPickerLabel,
 	ColorPickerRoot,
 	ColorPickerTrigger,
+	ColorPickerValueSwatch,
 } from "../ui/color-picker.tsx";
 import { useRecoilState } from "recoil";
 import { customStyleColorValuesAtom } from "../store/customizationValueStore.ts";
@@ -207,7 +208,7 @@ const ColorInputFields: React.FC<ColorInputFieldsProps> = ({
 	if (format === "gradient") {
 		return (
 			<Box>
-				<Text fontSize="xs" color="gray.600" mb={1}>
+				<Text textTransform="uppercase" fontSize="11px" fontWeight="semibold" letterSpacing="0.06em" color="#64748b" mb="6px">
 					{label.label}
 				</Text>
 				<Flex gap={2} align="center">
@@ -245,20 +246,55 @@ const ColorInputFields: React.FC<ColorInputFieldsProps> = ({
 			{baesAttributes && (
 				<GetUpdateableList id={id} color={drawerState.color} />
 			)}
-			<Flex>
-				<ColorPickerLabel fontSize="xs">{label.label}</ColorPickerLabel>
-			</Flex>
+			<ColorPickerLabel
+				textTransform="uppercase"
+				fontSize="11px"
+				fontWeight="semibold"
+				letterSpacing="0.06em"
+				color="#64748b"
+				mb="6px"
+			>
+				{label.label}
+			</ColorPickerLabel>
 
-			<ColorPickerControl>
-				<ColorPickerTrigger onClick={() => setDrawerOpen(true)} />
+			<ColorPickerControl gap={2.5} alignItems="center">
+				<ColorPickerTrigger
+					onClick={() => setDrawerOpen(true)}
+					boxSize="38px"
+					minW="38px"
+					p={0}
+					borderRadius="10px"
+					border="1px solid"
+					borderColor="ink.200"
+					overflow="hidden"
+					_hover={{ borderColor: "ink.300" }}
+				>
+					<ColorPickerValueSwatch boxSize="100%" borderRadius="9px" />
+				</ColorPickerTrigger>
 				<ColorPickerInput
 					value={inputValue}
 					onChange={handleInputChange}
 					onBlur={handleInputBlur}
 					onKeyDown={handleEnterPress}
-
+					flex="1"
+					h="38px"
+					borderRadius="10px"
+					border="1px solid"
+					borderColor="ink.200"
+					bg="ink.50"
+					color="ink.700"
+					fontWeight="medium"
+					_hover={{ borderColor: "ink.300" }}
+					_focus={{
+						borderColor: "brand.400",
+						bg: "white",
+						boxShadow: "0 0 0 1px #818cf8",
+					}}
 				/>
 			</ColorPickerControl>
+			<Text fontSize="11px" color="ink.400" mt={1.5}>
+				Click swatch to pick
+			</Text>
 		</ColorPickerRoot>
 	);
 };

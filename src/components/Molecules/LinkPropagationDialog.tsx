@@ -43,11 +43,11 @@ interface ChildRow {
 	newColor: string;
 }
 
-const ACCENT = "#735DFF";
-const ACCENT_HOVER = "#5b48d9";
-const ACCENT_SOFT = "rgba(115, 93, 255, 0.08)";
-const ACCENT_SOFT_STRONG = "rgba(115, 93, 255, 0.13)";
-const ACCENT_BORDER = "rgba(115, 93, 255, 0.30)";
+const ACCENT = "#4f46e5";
+const ACCENT_HOVER = "#4338ca";
+const ACCENT_SOFT = "rgba(79, 70, 229, 0.08)";
+const ACCENT_SOFT_STRONG = "rgba(79, 70, 229, 0.13)";
+const ACCENT_BORDER = "rgba(79, 70, 229, 0.30)";
 const SWATCH_SIZE = "42px";
 
 // A labelled color chip — the basic visual unit of the before/after pair.

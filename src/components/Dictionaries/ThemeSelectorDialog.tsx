@@ -66,7 +66,7 @@ const SafeImage: React.FC<ImageProps> = ({ src, alt, direction: _direction, ...r
         return (
             <Flex
                 {...rest}
-                bg="linear-gradient(135deg, #735DFF 0%, #a78bfa 50%, #c4b5fd 100%)"
+                bg="linear-gradient(135deg, #4f46e5 0%, #818cf8 50%, #a5b4fc 100%)"
                 align="center"
                 justify="center"
                 color="whiteAlpha.800"
@@ -178,21 +178,22 @@ const ThemeSelectorDialog: React.FC<ThemeSelectorDialogProps> = ({
             >
                 <GetUserCustomTheme theme={selectedTheme} />
                 <Dialog.Trigger asChild>
+                    
                     <Button
                         variant="outline"
                         size="sm"
                         h="auto"
-                        minH="38px"
-                        py={1.5}
-                        px={3}
+                        minH="32px"
+                        py={1}
+                        px={2.5}
                         gap={2}
                         borderWidth="1px"
-                        borderColor={selectedTheme ? 'gray.300' : '#735DFF'}
-                        color={selectedTheme ? 'gray.800' : '#735DFF'}
-                        bg={selectedTheme ? 'white' : 'rgba(115, 93, 255, 0.06)'}
+                        borderColor={selectedTheme ? 'gray.300' : '#4f46e5'}
+                        color={selectedTheme ? 'gray.800' : '#4f46e5'}
+                        bg={selectedTheme ? 'white' : 'rgba(79, 70, 229, 0.06)'}
                         _hover={{
-                            borderColor: '#735DFF',
-                            bg: 'rgba(115, 93, 255, 0.08)',
+                            borderColor: '#4f46e5',
+                            bg: 'rgba(79, 70, 229, 0.08)',
                         }}
                         transition="border-color 0.15s, background-color 0.15s"
                         onClick={() => setOpen(true)}
@@ -258,15 +259,15 @@ const ThemeSelectorDialog: React.FC<ThemeSelectorDialogProps> = ({
                             flexDirection="column"
                             borderRadius="xl"
                             boxShadow="2xl"
-                            bgColor="#f5f3ff"
-                            bgImage="radial-gradient(circle at 15% 5%, rgba(115, 93, 255, 0.22), transparent 55%), radial-gradient(circle at 85% 100%, rgba(115, 93, 255, 0.14), transparent 55%)"
+                            bgColor="#eef2ff"
+                            bgImage="radial-gradient(circle at 15% 5%, rgba(79, 70, 229, 0.22), transparent 55%), radial-gradient(circle at 85% 100%, rgba(79, 70, 229, 0.14), transparent 55%)"
                         >
                             {/* HEADER */}
                             <Dialog.Header
                                 bg="rgba(255, 255, 255, 0.7)"
                                 backdropFilter="blur(10px)"
                                 borderBottom="1px solid"
-                                borderColor="rgba(115, 93, 255, 0.12)"
+                                borderColor="rgba(79, 70, 229, 0.12)"
                                 px={{ base: 4, md: 7 }}
                                 py={4}
                                 flexShrink={0}
@@ -278,7 +279,7 @@ const ThemeSelectorDialog: React.FC<ThemeSelectorDialogProps> = ({
                                             justify="center"
                                             boxSize="40px"
                                             borderRadius="lg"
-                                            bg="linear-gradient(135deg, #735DFF 0%, #a78bfa 100%)"
+                                            bg="linear-gradient(135deg, #4f46e5 0%, #818cf8 100%)"
                                             color="white"
                                             flexShrink={0}
                                         >
@@ -315,7 +316,7 @@ const ThemeSelectorDialog: React.FC<ThemeSelectorDialogProps> = ({
                                                 borderRadius="full"
                                                 display={{ base: 'none', sm: 'inline-flex' }}
                                                 border="1px solid"
-                                                borderColor="rgba(115, 93, 255, 0.2)"
+                                                borderColor="rgba(79, 70, 229, 0.2)"
                                             >
                                                 {filteredThemes.length}{' '}
                                                 {filteredThemes.length === 1 ? 'theme' : 'themes'}
@@ -340,7 +341,7 @@ const ThemeSelectorDialog: React.FC<ThemeSelectorDialogProps> = ({
                                         px={{ base: 4, md: 7 }}
                                         py={4}
                                         borderBottom="1px solid"
-                                        borderColor="rgba(115, 93, 255, 0.12)"
+                                        borderColor="rgba(79, 70, 229, 0.12)"
                                     >
                                         <Box position="relative" maxW="520px">
                                             <Box
@@ -361,13 +362,13 @@ const ThemeSelectorDialog: React.FC<ThemeSelectorDialogProps> = ({
                                                 pl={10}
                                                 h="40px"
                                                 bg="white"
-                                                borderColor="rgba(115, 93, 255, 0.18)"
+                                                borderColor="rgba(79, 70, 229, 0.18)"
                                                 fontSize="sm"
                                                 borderRadius="lg"
-                                                _hover={{ borderColor: 'rgba(115, 93, 255, 0.35)' }}
+                                                _hover={{ borderColor: 'rgba(79, 70, 229, 0.35)' }}
                                                 _focus={{
-                                                    borderColor: '#735DFF',
-                                                    boxShadow: '0 0 0 3px rgba(115, 93, 255, 0.18)',
+                                                    borderColor: '#4f46e5',
+                                                    boxShadow: '0 0 0 3px rgba(79, 70, 229, 0.18)',
                                                 }}
                                                 transition="all 0.15s"
                                             />
@@ -394,7 +395,7 @@ const ThemeSelectorDialog: React.FC<ThemeSelectorDialogProps> = ({
                                                     rounded="xl"
                                                     overflow="hidden"
                                                     border="1px solid"
-                                                    borderColor="rgba(115, 93, 255, 0.1)"
+                                                    borderColor="rgba(79, 70, 229, 0.1)"
                                                     boxShadow="0 1px 3px rgba(15, 23, 42, 0.04)"
                                                 >
                                                     <Skeleton h={{ base: '110px', md: '140px' }} />
@@ -422,8 +423,8 @@ const ThemeSelectorDialog: React.FC<ThemeSelectorDialogProps> = ({
                                                 borderRadius="full"
                                                 bg="white"
                                                 border="1px solid"
-                                                borderColor="rgba(115, 93, 255, 0.2)"
-                                                color="#735DFF"
+                                                borderColor="rgba(79, 70, 229, 0.2)"
+                                                color="#4f46e5"
                                             >
                                                 <LuLayoutGrid size={28} />
                                             </Flex>
@@ -468,21 +469,21 @@ const ThemeSelectorDialog: React.FC<ThemeSelectorDialogProps> = ({
                                                         overflow="hidden"
                                                         border="1px solid"
                                                         borderColor={
-                                                            isSelected ? '#735DFF' : 'gray.100'
+                                                            isSelected ? '#4f46e5' : 'gray.100'
                                                         }
                                                         boxShadow={
                                                             isSelected
-                                                                ? '0 0 0 3px rgba(115, 93, 255, 0.18), 0 8px 20px rgba(115, 93, 255, 0.15)'
+                                                                ? '0 0 0 3px rgba(79, 70, 229, 0.18), 0 8px 20px rgba(79, 70, 229, 0.15)'
                                                                 : '0 1px 3px rgba(15, 23, 42, 0.06)'
                                                         }
                                                         transition="transform 0.25s ease, box-shadow 0.25s ease, border-color 0.2s ease"
                                                         _hover={{
                                                             transform: 'translateY(-3px)',
                                                             boxShadow: isSelected
-                                                                ? '0 0 0 3px rgba(115, 93, 255, 0.25), 0 14px 28px rgba(115, 93, 255, 0.22)'
+                                                                ? '0 0 0 3px rgba(79, 70, 229, 0.25), 0 14px 28px rgba(79, 70, 229, 0.22)'
                                                                 : '0 12px 24px rgba(15, 23, 42, 0.10)',
                                                             borderColor: isSelected
-                                                                ? '#735DFF'
+                                                                ? '#4f46e5'
                                                                 : 'gray.200',
                                                         }}
                                                     >
@@ -544,13 +545,13 @@ const ThemeSelectorDialog: React.FC<ThemeSelectorDialogProps> = ({
                                                                     position="absolute"
                                                                     top={2}
                                                                     right={2}
-                                                                    bg="#735DFF"
+                                                                    bg="#4f46e5"
                                                                     color="white"
                                                                     borderRadius="full"
                                                                     boxSize="28px"
                                                                     align="center"
                                                                     justify="center"
-                                                                    boxShadow="0 4px 8px rgba(115, 93, 255, 0.4)"
+                                                                    boxShadow="0 4px 8px rgba(79, 70, 229, 0.4)"
                                                                 >
                                                                     <LuCheck size={16} />
                                                                 </Flex>
@@ -579,7 +580,7 @@ const ThemeSelectorDialog: React.FC<ThemeSelectorDialogProps> = ({
                                                                     fontSize="xs"
                                                                     color={
                                                                         isSelected
-                                                                            ? '#735DFF'
+                                                                            ? '#4f46e5'
                                                                             : 'gray.500'
                                                                     }
                                                                     fontWeight={
@@ -643,7 +644,7 @@ const ThemeSelectorDialog: React.FC<ThemeSelectorDialogProps> = ({
                                                     justify="center"
                                                     boxSize="36px"
                                                     borderRadius="lg"
-                                                    bg="linear-gradient(135deg, #735DFF 0%, #a78bfa 100%)"
+                                                    bg="linear-gradient(135deg, #4f46e5 0%, #818cf8 100%)"
                                                     color="white"
                                                     flexShrink={0}
                                                 >
@@ -830,7 +831,7 @@ const ThemeSelectorDialog: React.FC<ThemeSelectorDialogProps> = ({
                                                                 border="2px solid"
                                                                 borderColor={
                                                                     active
-                                                                        ? '#735DFF'
+                                                                        ? '#4f46e5'
                                                                         : 'gray.200'
                                                                 }
                                                                 opacity={active ? 1 : 0.65}
@@ -838,7 +839,7 @@ const ThemeSelectorDialog: React.FC<ThemeSelectorDialogProps> = ({
                                                                 _hover={{
                                                                     opacity: 1,
                                                                     borderColor: active
-                                                                        ? '#735DFF'
+                                                                        ? '#4f46e5'
                                                                         : 'gray.400',
                                                                 }}
                                                                 flexShrink={0}
@@ -854,12 +855,12 @@ const ThemeSelectorDialog: React.FC<ThemeSelectorDialogProps> = ({
                                                     })}
                                             </Flex>
                                             <Button
-                                                bg="linear-gradient(135deg, #735DFF 0%, #5b48d9 100%)"
+                                                bg="linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)"
                                                 color="white"
                                                 _hover={{
-                                                    bg: 'linear-gradient(135deg, #5b48d9 0%, #4a3bb8 100%)',
+                                                    bg: 'linear-gradient(135deg, #4338ca 0%, #3730a3 100%)',
                                                     transform: 'translateY(-1px)',
-                                                    boxShadow: '0 8px 20px rgba(115, 93, 255, 0.35)',
+                                                    boxShadow: '0 8px 20px rgba(79, 70, 229, 0.35)',
                                                 }}
                                                 _active={{
                                                     transform: 'translateY(0)',
@@ -868,7 +869,7 @@ const ThemeSelectorDialog: React.FC<ThemeSelectorDialogProps> = ({
                                                 px={6}
                                                 fontWeight="semibold"
                                                 borderRadius="lg"
-                                                boxShadow="0 4px 12px rgba(115, 93, 255, 0.25)"
+                                                boxShadow="0 4px 12px rgba(79, 70, 229, 0.25)"
                                                 transition="all 0.2s"
                                                 flexShrink={0}
                                                 onClick={handleApply}

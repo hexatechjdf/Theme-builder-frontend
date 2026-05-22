@@ -1,5 +1,6 @@
 import { Box, Button, Card, Flex, Text } from "@chakra-ui/react";
 import { LuPalette } from "react-icons/lu";
+import { brand } from "../../theme";
 
 interface NoThemeSelectedStateProps {
 	// Opens the theme picker. Optional — pages that don't wire it still get a
@@ -14,56 +15,60 @@ const NoThemeSelectedState: React.FC<NoThemeSelectedStateProps> = ({
 		<Card.Root
 			mx={{ base: 2, md: 6 }}
 			mt={{ base: 4, md: 6 }}
-			p={{ base: 8, md: 12 }}
-			shadow="sm"
-			borderRadius="xl"
+			p={{ base: 10, md: 16 }}
 			bg="white"
+			border="1px solid"
+			borderColor="ink.200"
+			shadow={brand.cardShadow}
+			borderRadius="2xl"
 		>
 			<Flex direction="column" align="center" gap={5} textAlign="center">
 				<Flex
-					w="64px"
-					h="64px"
+					w="72px"
+					h="72px"
 					align="center"
 					justify="center"
-					borderRadius="full"
-					bg="rgba(115, 93, 255, 0.10)"
-					color="#735DFF"
+					borderRadius="20px"
+					bgImage={brand.gradientSoft}
+					color="white"
+					boxShadow={brand.shadow}
 				>
-					<LuPalette size={28} />
+					<LuPalette size={32} />
 				</Flex>
 				<Box>
 					<Text
 						fontSize={{ base: "lg", md: "xl" }}
 						fontWeight="bold"
-						color="gray.800"
+						color="ink.900"
+						letterSpacing="-0.01em"
 					>
 						No theme selected yet
 					</Text>
 					<Text
-						mt={1.5}
+						mt={2}
 						fontSize={{ base: "sm", md: "md" }}
-						color="gray.500"
-						maxW="420px"
+						color="ink.500"
+						maxW="440px"
+						lineHeight="1.65"
 					>
-						Pick a theme to start customizing its colors, fonts, and
-						spacing.
+						Choose a theme to start customizing its colors, fonts, and
+						spacing. You can preview any theme before you apply it.
 					</Text>
 				</Box>
 				{onSelectTheme && (
 					<Button
 						onClick={onSelectTheme}
-						bg="#735DFF"
-						color="white"
-						_hover={{ bg: "#5b48d9" }}
-						_active={{ bg: "#4c3cc7" }}
-						size="md"
-						px={6}
+						colorPalette="brand"
+						size="lg"
+						px={7}
 						gap={2}
-						borderRadius="lg"
-						boxShadow="0 4px 12px rgba(115, 93, 255, 0.30)"
+						borderRadius="12px"
+						fontWeight="semibold"
+						boxShadow={brand.shadow}
+						_hover={{ boxShadow: brand.shadowHover }}
 					>
-						<LuPalette size={16} />
-						Select Theme
+						<LuPalette size={18} />
+						Browse themes
 					</Button>
 				)}
 			</Flex>

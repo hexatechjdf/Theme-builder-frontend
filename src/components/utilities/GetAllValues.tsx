@@ -1,8 +1,11 @@
-import { useState } from "react";
-import { useRecoilValue, useSetRecoilState } from "recoil";
+import { useEffect, useRef, useState } from "react";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { Dialog, Flex, HStack, Portal, Stack, Text } from "@chakra-ui/react";
+import { LuTriangleAlert, LuUndo2 } from "react-icons/lu";
 import { Button } from "../ui/button";
+import { CloseButton } from "../ui/close-button";
 import store from "store2";
-import { usePostThemeSetting } from "../services/api";
+import { usePostThemeSetting, usePublishThemeToLive } from "../services/api";
 import type { DraftThemeResponse } from "../services/api";
 import { useQueryClient } from "react-query";
 import { toast } from "react-toastify";
@@ -13,6 +16,9 @@ import { lastSavedAtAtom } from "../Atoms/lastSavedAtAtom";
 import { levelModeAtom } from "../Atoms/levelMode";
 import { useChangedList } from "../hooks/useChangedList";
 import { notifyChangedListChanged } from "../store/changedListStore";
+import { registerSaver } from "../store/saveBus";
+import { clearFieldCache } from "./clearFieldCache";
+import { revertNonceAtom } from "../Atoms/revertNonceAtom";
 import { normalizeToFormat, wrapWithFormat } from "./formatColor";
 import type { SchemaField, SchemaSection } from "../Dictionaries/themeSchema";
 import {
@@ -73,16 +79,31 @@ export const UseAllValues = ({ section, sections }: UseAllValuesProps) => {
 
 	/* ─────── React‑Query ─────── */
 	const { mutate, isLoading } = usePostThemeSetting();
+	const revertMutation = usePublishThemeToLive();
 	const queryClient = useQueryClient();
-	const setPublishStatus = useSetRecoilState(publishStatusAtom);
+	const [publishStatus, setPublishStatus] = useRecoilState(publishStatusAtom);
 	const setSaveActivity = useSetRecoilState(saveActivityAtom);
 	const setLastSavedAt = useSetRecoilState(lastSavedAtAtom);
+	const setRevertNonce = useSetRecoilState(revertNonceAtom);
+	const [isReverting, setIsReverting] = useState(false);
+	// Confirmation gate for Revert — discarding the draft is destructive and
+	// can't be undone, so we make the user confirm before it fires.
+	const [revertConfirmOpen, setRevertConfirmOpen] = useState(false);
 	// Reactive view of `changedList` — drives the save button's enabled state.
 	const { hasChanges } = useChangedList();
 
 	/* ─────── Link-propagation dialog state ─────── */
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [pendingGroups, setPendingGroups] = useState<LinkPropagationGroup[]>([]);
+	// When the propagation dialog opens, the postValue Promise is left
+	// pending here until the user confirms (resolves with the mutation
+	// outcome) or cancels (resolves false). Lets callers like PublishMenu
+	// await the full Apply-Changes flow including the user decision.
+	const pendingResolveRef = useRef<((v: boolean) => void) | null>(null);
+	// Carries the `silent` flag across the propagation dialog so the save
+	// that runs on confirm still suppresses the "draft saved" toast when it
+	// was started by the publish auto-save chain.
+	const pendingSilentRef = useRef(false);
 
 	// Read the SAVED roots for the current section out of the react-query
 	// cache. This is the pre-edit picture of theme/login_roots — used both
@@ -161,7 +182,12 @@ export const UseAllValues = ({ section, sections }: UseAllValuesProps) => {
 
 	// Run the actual POST. Split out so the dialog confirm-handler can call
 	// it AFTER applying its decisions to store2.
-	const runMutation = async () => {
+	//
+	// Returns a Promise that resolves to `true` on a successful save and
+	// `false` on error — so callers (Apply Changes button, Publish menu's
+	// auto-save) can chain follow-up work on the actual outcome instead of
+	// firing and forgetting.
+	const runMutation = async (opts?: { silent?: boolean }): Promise<boolean> => {
 		let payload: any;
 
 		if (section === "theme") {
@@ -185,7 +211,7 @@ export const UseAllValues = ({ section, sections }: UseAllValuesProps) => {
 			const loaderId = store("animation");
 			if (!loaderId) {
 				toast.warning("Pick a loader before saving");
-				return;
+				return false;
 			}
 			payload = {
 				section: "loader",
@@ -196,55 +222,74 @@ export const UseAllValues = ({ section, sections }: UseAllValuesProps) => {
 		}
 
 		setSaveActivity("saving");
-		try {
-			await mutate(payload, {
-				onSuccess: () => {
-					toast.success("Saved as draft. Click Publish to push live");
-					store("changedList", []);
-					// Push the cleared list to subscribers (navbar indicator,
-					// leave-guard, save button) without waiting for the poll.
-					notifyChangedListChanged();
-					setLastSavedAt(Date.now());
-					setPublishStatus("draft");
-					// Invalidate every variant — react-query treats keys as a
-					// prefix match when you pass the partial key, so this also
-					// hits ["updatedUserThemeSetting", "<locationId>"].
-					queryClient.invalidateQueries(["updatedUserThemeSetting"]);
-				},
-				onError: (error) => {
-					toast.error(
-						error instanceof Error
-							? error.message
-							: "Failed to update theme. Please try again."
-					);
-				},
-				onSettled: () => {
-					setSaveActivity("idle");
-				},
-			});
-		} catch (err) {
-			setSaveActivity("idle");
-			toast.error("An unexpected error occurred");
-			console.error("Error posting theme:", err);
-		}
+		// react-query's `mutate` is fire-and-forget (only signals via
+		// callbacks). Wrap it in a Promise so callers can await the
+		// real outcome.
+		return new Promise<boolean>((resolve) => {
+			try {
+				mutate(payload, {
+					onSuccess: () => {
+						// Suppress the "draft saved" toast when this save is part
+						// of the publish auto-save chain — PublishMenu shows its
+						// own "published" toast, and "Click Publish to push live"
+						// would contradict the publish that's already happening.
+						if (!opts?.silent) {
+							toast.success(
+								"Saved as draft. Click Publish to push live"
+							);
+						}
+						store("changedList", []);
+						// Push the cleared list to subscribers (navbar indicator,
+						// leave-guard, save button) without waiting for the poll.
+						notifyChangedListChanged();
+						setLastSavedAt(Date.now());
+						setPublishStatus("draft");
+						// Invalidate every variant — react-query treats keys as a
+						// prefix match when you pass the partial key, so this also
+						// hits ["updatedUserThemeSetting", "<locationId>"].
+						queryClient.invalidateQueries(["updatedUserThemeSetting"]);
+						resolve(true);
+					},
+					onError: (error) => {
+						toast.error(
+							error instanceof Error
+								? error.message
+								: "Failed to update theme. Please try again."
+						);
+						resolve(false);
+					},
+					onSettled: () => {
+						setSaveActivity("idle");
+					},
+				});
+			} catch (err) {
+				setSaveActivity("idle");
+				toast.error("An unexpected error occurred");
+				console.error("Error posting theme:", err);
+				resolve(false);
+			}
+		});
 	};
 
-	const postValue = async () => {
+	const postValue = async (opts?: { silent?: boolean }): Promise<boolean> => {
 		const changedList: string[] = store("changedList") || [];
 
 		// Theme / login require user changes; loader is gated on whether a
 		// loader has been picked at all.
 		if (section === "theme" || section === "login") {
 			if (changedList.length === 0) {
-				toast.warning("You have not changed any values");
-				return;
+				if (!opts?.silent) {
+					toast.warning("You have not changed any values");
+				}
+				// Nothing to save → clean no-op (publish auto-save treats
+				// this as success and continues straight to publish).
+				return true;
 			}
 		}
 
 		// Loader doesn't carry roots → no link propagation possible.
 		if (section === "loader") {
-			runMutation();
-			return;
+			return runMutation(opts);
 		}
 
 		// Build the dependency graph from THIS section's schema only — links
@@ -319,19 +364,19 @@ export const UseAllValues = ({ section, sections }: UseAllValuesProps) => {
 		if (groups.length === 0) {
 			// No parent-with-children edits — fall through to the existing
 			// save flow.
-			runMutation();
-			return;
+			return runMutation(opts);
 		}
 
 		// Otherwise: open the popup. The confirm-handler will apply the
 		// chosen link/detach state to store2, then run the mutation.
-		setPendingGroups(groups);
-		setDialogOpen(true);
-		// Stash savedRoots on the component so the confirm-handler can read it
-		// without recomputing — keep it inside this closure via the handler.
-		// (We don't need to persist beyond this click; the handler is closed
-		// over the local snapshot.)
-		// — implemented inline via handleConfirm below using getSavedRootsForSection().
+		// The returned Promise stays pending until the user resolves the
+		// dialog via handleConfirm / handleCancel.
+		return new Promise<boolean>((resolve) => {
+			pendingResolveRef.current = resolve;
+			pendingSilentRef.current = opts?.silent ?? false;
+			setPendingGroups(groups);
+			setDialogOpen(true);
+		});
 	};
 
 	const handleConfirm = async (decisions: Record<string, boolean>) => {
@@ -386,13 +431,47 @@ export const UseAllValues = ({ section, sections }: UseAllValuesProps) => {
 
 		setDialogOpen(false);
 		setPendingGroups([]);
-		runMutation();
+
+		const success = await runMutation({ silent: pendingSilentRef.current });
+		// Resolve the deferred postValue Promise so any awaiting caller
+		// (Publish menu's auto-save) sees the real outcome.
+		const resolve = pendingResolveRef.current;
+		pendingResolveRef.current = null;
+		pendingSilentRef.current = false;
+		resolve?.(success);
 	};
 
 	const handleCancel = () => {
 		setDialogOpen(false);
 		setPendingGroups([]);
+		// User cancelled the propagation decision → treat the deferred
+		// postValue Promise as a cancelled save so PublishMenu aborts
+		// the publish chain.
+		const resolve = pendingResolveRef.current;
+		pendingResolveRef.current = null;
+		pendingSilentRef.current = false;
+		resolve?.(false);
 	};
+
+	// Register this page's saver on the global bus so the navbar's Publish
+	// button can run Apply Changes (with the link-propagation dialog if
+	// needed) before publishing. Uses a ref-of-latest-callback so the
+	// registered wrapper always sees current closures without re-binding
+	// the registration on every render.
+	const postValueRef = useRef(postValue);
+	useEffect(() => {
+		postValueRef.current = postValue;
+	});
+	useEffect(() => {
+		registerSaver(() => postValueRef.current({ silent: true }));
+		return () => {
+			registerSaver(null);
+			// If we unmount mid-dialog, resolve the awaiting auto-save as
+			// cancelled so PublishMenu's await doesn't hang forever.
+			pendingResolveRef.current?.(false);
+			pendingResolveRef.current = null;
+		};
+	}, []);
 
 	// Theme/Login saves require at least one edit. The loader save is gated
 	// separately (on whether a loader is picked) inside runMutation, so its
@@ -400,28 +479,205 @@ export const UseAllValues = ({ section, sections }: UseAllValuesProps) => {
 	const cleanDisabled =
 		(section === "theme" || section === "login") && !hasChanges;
 
+	// Revert: discard the current draft and restore the live (published)
+	// version. Rewrites draft←live server-side, refetches, clears the field
+	// cache and bumps revertNonce so MainLayout remounts the field tree and
+	// every field re-reads the reverted values without a page reload.
+	const handleRevert = () => {
+		const payload = { from: "live", to: "draft", locationId };
+		setIsReverting(true);
+		setSaveActivity("reverting");
+		revertMutation.mutate(payload as any, {
+			onSuccess: async () => {
+				try {
+					await queryClient.invalidateQueries([
+						"updatedUserThemeSetting",
+					]);
+				} catch {
+					/* a refetch hiccup shouldn't block the reset + remount */
+				}
+				clearFieldCache();
+				notifyChangedListChanged();
+				setRevertNonce((n) => n + 1);
+				toast.success("Changes reverted to the published version");
+				// Draft now matches live → nothing pending.
+				setPublishStatus("live");
+			},
+			onError: (err: any) => {
+				toast.warn(
+					err?.response?.data?.message ||
+						err?.message ||
+						"Failed to revert. Please try again."
+				);
+			},
+			onSettled: () => {
+				setIsReverting(false);
+				setSaveActivity("idle");
+			},
+		});
+	};
+
+	// Nothing to revert when the draft already matches live (publishStatus
+	// "live") and there are no unsaved edits.
+	const revertDisabled = publishStatus !== "draft" && !hasChanges;
+
+	// Fired by the warning dialog's confirm button — close the dialog, then
+	// run the actual revert.
+	const confirmRevert = () => {
+		setRevertConfirmOpen(false);
+		handleRevert();
+	};
+
 	return (
 		<>
-			<Button
-				onClick={postValue}
-				size="sm"
-				loading={isLoading}
-				loadingText="Saving…"
-				disabled={cleanDisabled}
-				flexShrink={0}
-				transition="opacity 0.2s ease, background-color 0.2s ease"
-				title={
-					cleanDisabled ? "Make a change to enable saving" : undefined
-				}
-			>
-				Apply Changes
-			</Button>
+			<HStack gap={2} flexShrink={0}>
+				<Button
+					onClick={() => setRevertConfirmOpen(true)}
+					size="sm"
+					h="32px"
+					minH="32px"
+					px={{ base: 2.5, md: 3 }}
+					fontSize="xs"
+					variant="outline"
+					borderRadius="lg"
+					fontWeight="semibold"
+					color="ink.600"
+					borderColor="ink.300"
+					bg="white"
+					_hover={{ bg: "ink.100", borderColor: "ink.400" }}
+					loading={isReverting}
+					loadingText="Reverting…"
+					disabled={revertDisabled}
+					gap={1.5}
+					title={
+						revertDisabled
+							? "Nothing to revert — the draft matches what's live"
+							: "Revert to the published version"
+					}
+				>
+					<LuUndo2 size={14} />
+					Revert
+				</Button>
+				<Button
+					onClick={() => postValue()}
+					size="sm"
+					h="32px"
+					minH="32px"
+					px={{ base: 3, md: 3.5 }}
+					fontSize="xs"
+					colorPalette="brand"
+					borderRadius="lg"
+					fontWeight="semibold"
+					loading={isLoading}
+					loadingText="Saving…"
+					disabled={cleanDisabled}
+					transition="opacity 0.2s ease, background-color 0.2s ease"
+					title={
+						cleanDisabled ? "Make a change to enable saving" : undefined
+					}
+				>
+					Apply Changes
+				</Button>
+			</HStack>
 			<LinkPropagationDialog
 				open={dialogOpen}
 				groups={pendingGroups}
 				onConfirm={handleConfirm}
 				onCancel={handleCancel}
 			/>
+
+			<Dialog.Root
+				open={revertConfirmOpen}
+				onOpenChange={(d) => setRevertConfirmOpen(d.open)}
+				placement="center"
+				motionPreset="slide-in-bottom"
+			>
+				<Portal>
+					<Dialog.Backdrop bg="blackAlpha.700" backdropFilter="blur(4px)" />
+					<Dialog.Positioner>
+						<Dialog.Content
+							w={{ base: "92vw", md: "440px" }}
+							borderRadius="2xl"
+							overflow="hidden"
+						>
+							<Dialog.Header
+								px={{ base: 5, md: 6 }}
+								py={4}
+								borderBottom="1px solid"
+								borderColor="ink.100"
+							>
+								<Flex align="center" gap={3} w="100%">
+									<Flex
+										align="center"
+										justify="center"
+										boxSize="40px"
+										borderRadius="11px"
+										bg="orange.100"
+										color="orange.600"
+										flexShrink={0}
+									>
+										<LuTriangleAlert size={20} />
+									</Flex>
+									<Stack gap={0} flex={1} minW={0}>
+										<Dialog.Title
+											fontSize="lg"
+											fontWeight="bold"
+											color="ink.900"
+										>
+											Revert changes?
+										</Dialog.Title>
+										<Text fontSize="sm" color="ink.500">
+											This restores the published version.
+										</Text>
+									</Stack>
+									<Dialog.CloseTrigger asChild>
+										<CloseButton size="sm" />
+									</Dialog.CloseTrigger>
+								</Flex>
+							</Dialog.Header>
+
+							<Dialog.Body px={{ base: 5, md: 6 }} py={4}>
+								<Text fontSize="sm" color="ink.600" lineHeight="1.6">
+									Your current draft will be discarded and replaced with
+									the live (published) version. Any unsaved or
+									unpublished edits will be lost — this can't be undone.
+								</Text>
+							</Dialog.Body>
+
+							<Dialog.Footer
+								px={{ base: 5, md: 6 }}
+								py={4}
+								gap={2.5}
+								borderTop="1px solid"
+								borderColor="ink.100"
+								flexDirection={{ base: "column-reverse", sm: "row" }}
+							>
+								<Button
+									variant="outline"
+									borderColor="ink.300"
+									color="ink.700"
+									onClick={() => setRevertConfirmOpen(false)}
+									w={{ base: "100%", sm: "auto" }}
+									flex={{ base: "none", sm: 1 }}
+								>
+									Cancel
+								</Button>
+								<Button
+									colorPalette="orange"
+									onClick={confirmRevert}
+									gap={1.5}
+									fontWeight="semibold"
+									w={{ base: "100%", sm: "auto" }}
+									flex={{ base: "none", sm: 1 }}
+								>
+									<LuUndo2 size={15} />
+									Revert
+								</Button>
+							</Dialog.Footer>
+						</Dialog.Content>
+					</Dialog.Positioner>
+				</Portal>
+			</Dialog.Root>
 		</>
 	);
 };

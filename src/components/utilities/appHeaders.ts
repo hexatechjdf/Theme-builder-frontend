@@ -12,3 +12,14 @@ export const APP_ID = "69d79fdae05393afc48ea4a3";
 // Dev fallback company id. Used out of the GHL iframe (local dev) when there's
 // no parent frame to supply the real per-user company_id via postMessage.
 export const DEV_COMPANY_ID = "oEEb4PRxpIyxEV1LxLea";
+
+// True ONLY on a developer machine: the Vite dev server, or a build served
+// from localhost (e.g. `vite preview`). The hardcoded SSO_TOKEN / DEV_COMPANY_ID
+// above are allowed to authenticate requests ONLY when this is true. On any
+// real (live) host the app must obtain a per-user SSO token from the GHL parent
+// frame — it must never fall back to the shared dev token, because that would
+// authenticate every live user as the dev's company.
+export const IS_LOCAL_DEV: boolean =
+	import.meta.env.DEV ||
+	(typeof window !== "undefined" &&
+		["localhost", "127.0.0.1"].includes(window.location.hostname));

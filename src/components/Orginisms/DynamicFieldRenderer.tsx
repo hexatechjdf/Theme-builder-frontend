@@ -1,17 +1,19 @@
 import React, { useState } from "react";
 import {
 	Box,
+	Flex,
 	Grid,
 	GridItem,
 	HStack,
 	IconButton,
+	Image,
 	Input,
 	NativeSelect,
 	Stack,
 	Text,
 } from "@chakra-ui/react";
 import { AnimatePresence, motion } from "framer-motion";
-import { LuChevronDown, LuChevronUp } from "react-icons/lu";
+import { LuChevronDown, LuChevronUp, LuImage } from "react-icons/lu";
 import store from "store2";
 import { Field } from "../ui/field";
 import ColorPickerDrawerInputField from "./ColorPickerDrawerInputField";
@@ -303,24 +305,76 @@ const UrlInputField: React.FC<Props> = ({ field }) => {
 		),
 	);
 	const [value, setValue] = useState<string>(initial);
+	// Reset the error flag on edit so a corrected URL re-attempts to load.
+	const [imgError, setImgError] = useState(false);
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const next = e.target.value;
 		setValue(next);
+		setImgError(false);
 		store(field.key, next);
 		pushChangedKey(field.key);
 	};
 
+	const showImage = value.trim().length > 0 && !imgError;
+
 	return (
-		<Field label={field.label}>
-			<Input
-				value={value}
-				onChange={handleChange}
-				placeholder="https://example.com/image.png"
-				variant="outline"
-				minW="50px"
-			/>
-		</Field>
+		<Box>
+			<Field label={field.label}>
+				<Flex gap={2.5} align="center" w="full">
+					{/* Live image preview — falls back to a placeholder icon
+					    until a valid image URL is entered. */}
+					<Box
+						boxSize="38px"
+						minW="38px"
+						rounded="10px"
+						border="1px solid"
+						borderColor="ink.200"
+						bg="ink.50"
+						overflow="hidden"
+						display="flex"
+						alignItems="center"
+						justifyContent="center"
+						color="ink.400"
+						flexShrink={0}
+					>
+						{showImage ? (
+							<Image
+								src={value}
+								alt=""
+								boxSize="100%"
+								objectFit="cover"
+								onError={() => setImgError(true)}
+							/>
+						) : (
+							<LuImage size={18} />
+						)}
+					</Box>
+					<Input
+						value={value}
+						onChange={handleChange}
+						placeholder="https://example.com/logo.png"
+						flex="1"
+						minW={0}
+						h="38px"
+						borderRadius="10px"
+						border="1px solid"
+						borderColor="ink.200"
+						bg="ink.50"
+						color="ink.700"
+						_hover={{ borderColor: "ink.300" }}
+						_focus={{
+							borderColor: "brand.400",
+							bg: "white",
+							boxShadow: "0 0 0 1px #818cf8",
+						}}
+					/>
+				</Flex>
+			</Field>
+			<Text fontSize="11px" color="ink.400" mt={1.5}>
+				Paste a URL to preview
+			</Text>
+		</Box>
 	);
 };
 

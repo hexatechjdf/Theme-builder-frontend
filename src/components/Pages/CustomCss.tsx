@@ -1,14 +1,18 @@
-import { Box, Button, VStack } from "@chakra-ui/react";
+import { Box, Flex, Stack, Text } from "@chakra-ui/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { css } from "@codemirror/lang-css";
 import { autocompletion } from "@codemirror/autocomplete";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { CSSLint } from "csslint";
+import { FaCode } from "react-icons/fa6";
+import { LuCircleCheck, LuTriangleAlert } from "react-icons/lu";
 import { usePostThemeSetting, useGetUpdatedUserThemeSetting } from "../services/api";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { publishStatusAtom } from "../Atoms/publishStatus";
 import { levelModeAtom } from "../Atoms/levelMode";
+import { Button } from "../ui/button";
+import PageHeader from "../Molecules/PageHeader";
 
 const CustomCss = () => {
   const [value, setValue] = useState("example, \n" + "   body  {\n  color: red;\n}");
@@ -44,7 +48,7 @@ const CustomCss = () => {
         )
         .join("\n");
       setIsError(true);
-      setConsoleMessage(`❌ CSS Errors:\n${errors}`);
+      setConsoleMessage(`Please fix the following before saving:\n${errors}`);
       return;
     }
 
@@ -67,11 +71,15 @@ const CustomCss = () => {
       setPublishStatus("draft");
 
       setIsError(false);
-      setConsoleMessage("✅ CSS saved as draft — click Publish to push live");
+      setConsoleMessage(
+        "Saved as a draft. Click Publish in the top bar to push it live."
+      );
     } catch (error) {
       console.error("Failed to save custom CSS:", error);
       setIsError(true);
-      setConsoleMessage("❌ Failed to save CSS to server");
+      setConsoleMessage(
+        "We couldn't save your CSS. Please check your connection and try again."
+      );
     }
   };
 
@@ -99,18 +107,59 @@ const CustomCss = () => {
   }, [draftData, currentLocationId]);
 
   return (
-    <Box width="100%" p={{ base: 2, md: 4 }}>
-      <VStack align="stretch" gap={{ base: 3, md: 4 }}>
+    <>
+      <PageHeader
+        icon={<FaCode size={20} />}
+        title="Custom CSS"
+        description="Add your own CSS to fine-tune anything the theme controls don't cover. Applied on top of your theme and saved as a draft until you publish."
+      />
+
+      <Box mx={{ base: 2, md: 6 }}>
         <Box
-          width="100%"
-          borderRadius="md"
+          bg="white"
+          border="1px solid"
+          borderColor="gray.200"
+          borderRadius="xl"
+          shadow="sm"
           overflow="hidden"
-          boxShadow="md"
-          border="1px solid #2d2d2d"
         >
+          {/* Toolbar */}
+          <Flex
+            align="center"
+            justify="space-between"
+            gap={3}
+            px={{ base: 3, md: 4 }}
+            py={3}
+            borderBottom="1px solid"
+            borderColor="gray.100"
+            direction={{ base: "column", sm: "row" }}
+          >
+            <Stack gap={0.5} minW={0} w={{ base: "100%", sm: "auto" }}>
+              <Text fontSize="sm" fontWeight="semibold" color="gray.800">
+                Stylesheet editor
+              </Text>
+              <Text fontSize="xs" color="gray.500">
+                Your CSS is validated automatically before it's saved.
+              </Text>
+            </Stack>
+            <Button
+              onClick={handleSave}
+              colorPalette="brand"
+              size="sm"
+              borderRadius="lg"
+              fontWeight="semibold"
+              loading={isLoading}
+              loadingText="Saving…"
+              w={{ base: "100%", sm: "auto" }}
+            >
+              Save CSS
+            </Button>
+          </Flex>
+
+          {/* Editor */}
           <CodeMirror
             value={value}
-            height="300px"
+            height="360px"
             onChange={onChange}
             extensions={[css(), autocompletion()]}
             theme={oneDark}
@@ -118,32 +167,41 @@ const CustomCss = () => {
           />
         </Box>
 
-        <Button
-          colorScheme="blue"
-          alignSelf={{ base: "stretch", sm: "flex-end" }}
-          onClick={handleSave}
-        >
-          {isLoading ? "Loading..." : "Apply CSS"}
-        </Button>
-
+        {/* Validation / save result */}
         {consoleMessage && (
-          <Box
-            bg="gray.900"
-            color={isError ? "red.300" : "green.300"}
-            fontFamily="monospace"
-            fontSize="sm"
-            p={3}
-            borderRadius="md"
-            whiteSpace="pre-wrap"
+          <Flex
+            mt={3}
+            gap={2.5}
+            p={3.5}
+            borderRadius="lg"
             border="1px solid"
-            borderColor={isError ? "red.500" : "green.500"}
-            overflowX="auto"
+            bg={isError ? "red.50" : "green.50"}
+            borderColor={isError ? "red.200" : "green.200"}
+            align="flex-start"
           >
-            {consoleMessage}
-          </Box>
+            <Box
+              color={isError ? "red.500" : "green.600"}
+              flexShrink={0}
+              mt="1px"
+            >
+              {isError ? (
+                <LuTriangleAlert size={18} />
+              ) : (
+                <LuCircleCheck size={18} />
+              )}
+            </Box>
+            <Text
+              fontSize="sm"
+              color={isError ? "red.700" : "green.700"}
+              whiteSpace="pre-wrap"
+              lineHeight="1.6"
+            >
+              {consoleMessage}
+            </Text>
+          </Flex>
         )}
-      </VStack>
-    </Box>
+      </Box>
+    </>
   );
 };
 

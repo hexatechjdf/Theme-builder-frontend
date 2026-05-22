@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
-import { Box, Text, Flex } from "@chakra-ui/react";
-import ThemePresetMenu from "../Atoms/ThemePresetMenu";
+import { Text, Flex } from "@chakra-ui/react";
+import { LuLayoutDashboard } from "react-icons/lu";
 import { UseAllValues } from "../utilities/GetAllValues";
 import Styletabs from "../Layouts/Styletabs";
-import LoadingFallback from "../Atoms/LoadingFallbackSpinner";
+import ThemeContentSkeleton from "../Atoms/ThemeContentSkeleton";
 import NoThemeSelectedState from "../Atoms/NoThemeSelectedState";
+import FeedbackState from "../Atoms/FeedbackState";
+import PageHeader from "../Molecules/PageHeader";
+import StickyActionBar from "../Molecules/StickyActionBar";
 import ThemeSelectorDialog from "../Dictionaries/ThemeSelectorDialog";
 import useUserTheme from "../services/api";
 import { useGetUpdatedUserThemeSetting, useThemeRootSections } from "../services/api";
@@ -124,77 +127,93 @@ const Dashboard = () => {
 	// 	);
 	// }
 
+	// Action toolbar (theme picker + Apply Changes). Built once and shown in
+	// every state — when a theme is loaded it rides in the sticky zone with
+	// the section tabs; otherwise it sits in its own sticky zone so the user
+	// can always pick / change a theme.
+	const toolbar = (
+		<Flex
+			mx={{ base: 2, md: 6 }}
+			mt={{ base: 3, md: 4 }}
+			px={{ base: 2.5, md: 4 }}
+			py={{ base: 1.5, md: 2 }}
+			bg="white"
+			border="1px solid"
+			borderColor="ink.300"
+			borderRadius="xl"
+			boxShadow="0 2px 8px -2px rgba(16, 24, 40, 0.14)"
+			gap={{ base: 2, md: 3 }}
+			direction="row"
+			align="center"
+			justify="space-between"
+		>
+			<Flex align="center" gap={2.5} minW={0} flex="1">
+				<Text
+					fontSize="xs"
+					color="ink.500"
+					textTransform="uppercase"
+					letterSpacing="wider"
+					fontWeight="bold"
+					flexShrink={0}
+					display={{ base: "none", sm: "inline" }}
+				>
+					Theme
+				</Text>
+				<ThemeSelectorDialog
+					themes={defaultThemeData?.dashboards || []}
+					label="Select Dashboard Theme"
+					ThemeTitle="Choose Dashboard Theme"
+					isLoading={isDefaultLoading}
+					apiError={defaultError?.message || ""}
+					themeType="dashboard"
+					open={pickerOpen}
+					onOpenChange={setPickerOpen}
+				/>
+			</Flex>
+			<UseAllValues section="theme" sections={sections} />
+		</Flex>
+	);
+
+	// True only once a theme is picked AND its schema + saved draft are ready
+	// — the field tree (and its tabs) can mount. ColorDrawer reads store(id)
+	// once on mount, so we wait for hydration before rendering it.
+	const showTabs =
+		!!themeUuid && !isSchemaLoading && isHydrated && !schemaError;
+
 	return (
 		<>
-			{/*
-			  Compact sticky action bar. Replaces the previous Card.Root header
-			  which used p={6} + a stacked title row and ate a chunk of vertical
-			  space. The picker + Apply Changes sit on a single line; on small
-			  screens they stack. Sticks to the top of the scroll container so
-			  the user can always reach Apply Changes without scrolling back up.
-			*/}
-			<Flex
-				position="sticky"
-				top={0}
-				zIndex={1}
-				mx={{ base: 2, md: 6 }}
-				px={{ base: 3, md: 4 }}
-				py={2}
-				bg="white"
-				border="1px solid"
-				borderColor="gray.200"
-				borderRadius="md"
-				shadow="xs"
-				gap={3}
-				direction={{ base: "column", sm: "row" }}
-				align={{ base: "stretch", sm: "center" }}
-				justify="space-between"
-			>
-				<Flex align="center" gap={2.5} minW={0}>
-					<Text
-						fontSize="xs"
-						color="gray.500"
-						textTransform="uppercase"
-						letterSpacing="wider"
-						fontWeight="semibold"
-						flexShrink={0}
-						display={{ base: "none", sm: "inline" }}
-					>
-						Theme
-					</Text>
-					<ThemeSelectorDialog
-						themes={defaultThemeData?.dashboards || []}
-						label="Select Dashboard Theme"
-						ThemeTitle="Choose Dashboard Theme"
-						isLoading={isDefaultLoading}
-						apiError={defaultError?.message || ""}
-						themeType="dashboard"
-						open={pickerOpen}
-						onOpenChange={setPickerOpen}
-					/>
-				</Flex>
-				<UseAllValues section="theme" sections={sections} />
-			</Flex>
+			<PageHeader
+				icon={<LuLayoutDashboard size={22} />}
+				title="Dashboard Theme"
+				description="Customize the colors, fonts, and spacing of your CRM dashboard. Changes are saved as a draft until you publish."
+			/>
 
-			{!themeUuid ? (
-				<NoThemeSelectedState onSelectTheme={() => setPickerOpen(true)} />
-			) : isSchemaLoading || !isHydrated ? (
-				// Wait for BOTH the schema AND the saved-draft hydration before
-				// mounting the field tree. ColorDrawer reads store(id) once on
-				// mount, so if it mounts while only the schema has been written,
-				// the picker locks onto the default rgb and never picks up the
-				// saved value when it lands a beat later.
-				<LoadingFallback />
-			) : schemaError ? (
-				<Box p={6}>
-					<Text color="red.500">{schemaError.message}</Text>
-				</Box>
-			) : (
+			{showTabs ? (
 				<Styletabs
 					key={currentLocationId}
 					updatedThemeValue={updateThemeValue}
 					schema={sections}
+					toolbar={toolbar}
 				/>
+			) : (
+				<>
+					<StickyActionBar>{toolbar}</StickyActionBar>
+					{!themeUuid ? (
+						<NoThemeSelectedState
+							onSelectTheme={() => setPickerOpen(true)}
+						/>
+					) : isSchemaLoading || !isHydrated ? (
+						<ThemeContentSkeleton />
+					) : (
+						<FeedbackState
+							title="Couldn't load this theme"
+							description={
+								schemaError?.message ||
+								"Something went wrong while loading the theme settings. Please try again."
+							}
+						/>
+					)}
+				</>
 			)}
 		</>
 	);

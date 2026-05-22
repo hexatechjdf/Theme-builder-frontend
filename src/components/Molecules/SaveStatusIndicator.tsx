@@ -45,17 +45,17 @@ const SaveStatusIndicator = () => {
 
 	const view: View = (() => {
 		const active = {
-			pillBg: "whiteAlpha.200",
-			pillBorder: "whiteAlpha.300",
-			textColor: "white",
+			pillBg: "ink.100",
+			pillBorder: "ink.200",
+			textColor: "ink.700",
 		};
 
 		if (activity === "saving")
-			return { label: "Saving…", detail: "", dotColor: "#BFDBFE", pulse: true, showCheck: false, ...active };
+			return { label: "Saving…", detail: "", dotColor: "#2563EB", pulse: true, showCheck: false, ...active };
 		if (activity === "publishing")
-			return { label: "Publishing…", detail: "", dotColor: "#86EFAC", pulse: true, showCheck: false, ...active };
+			return { label: "Publishing…", detail: "", dotColor: "#16A34A", pulse: true, showCheck: false, ...active };
 		if (activity === "reverting")
-			return { label: "Reverting…", detail: "", dotColor: "#FCD34D", pulse: true, showCheck: false, ...active };
+			return { label: "Reverting…", detail: "", dotColor: "#D97706", pulse: true, showCheck: false, ...active };
 
 		if (hasChanges)
 			return {
@@ -73,7 +73,7 @@ const SaveStatusIndicator = () => {
 			return {
 				label: "Draft saved",
 				detail: formatRelativeTime(lastSavedAt),
-				dotColor: "#FCD34D",
+				dotColor: "#D97706",
 				pulse: false,
 				showCheck: true,
 				...active,
@@ -82,7 +82,7 @@ const SaveStatusIndicator = () => {
 		return {
 			label: "All changes live",
 			detail: "",
-			dotColor: "#86EFAC",
+			dotColor: "#16A34A",
 			pulse: false,
 			showCheck: true,
 			...active,
@@ -93,7 +93,7 @@ const SaveStatusIndicator = () => {
 
 	return (
 		<HStack
-			h="32px"
+			h="36px"
 			gap={1.5}
 			px={3}
 			borderRadius="full"
@@ -133,7 +133,7 @@ const SaveStatusIndicator = () => {
 			)}
 
 			<Text
-				display={{ base: "none", sm: "block" }}
+				display={{ base: "none", lg: "block" }}
 				fontSize="xs"
 				fontWeight="semibold"
 				color={view.textColor}

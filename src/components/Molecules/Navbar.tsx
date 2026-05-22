@@ -1,8 +1,9 @@
-import { Box, Flex, Image, Tabs } from "@chakra-ui/react";
+import { Box, Flex, Image, Tabs, Text } from "@chakra-ui/react";
 import { LuLayoutDashboard } from "react-icons/lu";
 import { AiOutlineLogin } from "react-icons/ai";
 import { TbLoader3 } from "react-icons/tb";
 import { FaCode } from "react-icons/fa6";
+import type { IconType } from "react-icons";
 import { useNavigate, useSearchParams, type To } from "react-router-dom";
 import { useEffect, useState } from "react";
 import PublishMene from "./PublishMenu";
@@ -10,7 +11,6 @@ import Profile from "../Orginisms/Profile";
 import LevelSwitcher from "./LevelSwitcher";
 import SaveStatusIndicator from "./SaveStatusIndicator";
 import { useNavigationGuard } from "../Layouts/NavigationGuard";
-
 
 type TabValue = "themeCustomize" | "loginTheme" | "loaderAnimations" | "customCss";
 
@@ -20,6 +20,15 @@ const TAB_PATHS: Record<TabValue, string> = {
 	loaderAnimations: "/loader",
 	customCss: "/custom-css",
 };
+
+// Tab metadata — shared by the desktop top tabs and the mobile bottom nav.
+// `Icon` is the component (not a rendered node) so each surface can size it.
+const TABS: { value: TabValue; label: string; Icon: IconType }[] = [
+	{ value: "themeCustomize", label: "Dashboard", Icon: LuLayoutDashboard },
+	{ value: "loginTheme", label: "Login Page", Icon: AiOutlineLogin },
+	{ value: "loaderAnimations", label: "Loader", Icon: TbLoader3 },
+	{ value: "customCss", label: "Custom CSS", Icon: FaCode },
+];
 
 const StickyNavbar: React.FC = () => {
 	const navigate = useNavigate();
@@ -64,156 +73,157 @@ const StickyNavbar: React.FC = () => {
 		guardedNavigate(targetFor(value), () => commitTab(value));
 	};
 
+	const goHome = () =>
+		guardedNavigate(targetFor("themeCustomize"), () =>
+			commitTab("themeCustomize"),
+		);
+
 	return (
-
-		<Box
-			position="sticky"
-			top="0"
-			zIndex="800"
-			bg="#735DFF"
-			w={["100%", "100%", "100%", "100%"]}
-			// minH={"14vh"}
-			// display="flex"
-			// justifyContent="center"
-			alignItems="end"
-		>
-
-			<Flex
-				width={{ base: "95%", md: "90%" }}
-				margin="0 auto"
-				pt="14px"
-				align="center"
-				justify="space-between"
-				gap={2}
+		<>
+			<Box
+				as="header"
+				position="sticky"
+				top="0"
+				zIndex="800"
+				bg="white"
+				borderBottom="1px solid"
+				borderColor="ink.200"
+				boxShadow="0 1px 3px rgba(16, 24, 40, 0.04)"
 			>
-				<Image
-					src="https://msgsndr-private.storage.googleapis.com/companyPhotos/79702884-fc35-45c4-abe7-39720fd41b72.png"
-					alt="Theme Builder"
-					h={{ base: "60px", md: "60px" }}
-					w="auto"
-					maxW={{ base: "150px", md: "220px" }}
-					objectFit="contain"
-					cursor="pointer"
-					flexShrink={0}
-					onClick={() =>
-						guardedNavigate(targetFor("themeCustomize"), () =>
-							commitTab("themeCustomize"),
-						)
-					}
-				/>
-				<Flex gap={{ base: 2, md: 3 }} align="center">
-					<Profile />
-					<SaveStatusIndicator />
-					<PublishMene />
+				{/* Single bar: logo + section nav (lg+) on the left, scope +
+				    actions on the right. On small screens the section tabs move
+				    to the fixed bottom nav, so they're hidden here. */}
+				<Flex
+					px={{ base: 2, sm: 3, md: 4, lg: 6 }}
+					py={{ base: 2, md: 2.5 }}
+					align="center"
+					justify="space-between"
+					gap={{ base: 1.5, md: 4 }}
+				>
+					{/* Left cluster — logo + nav tabs (tabs are desktop-only;
+					    they move to the bottom nav on small screens). */}
+					<Flex align="center" gap={{ base: 2, md: 4 }} minW={0} flex="1">
+						<Image
+							src="https://msgsndr-private.storage.googleapis.com/companyPhotos/79702884-fc35-45c4-abe7-39720fd41b72.png"
+							alt="Theme Builder"
+							h={{ base: "26px", md: "36px" }}
+							w="auto"
+							maxW={{ base: "92px", sm: "120px", md: "170px" }}
+							objectFit="contain"
+							cursor="pointer"
+							onClick={goHome}
+							flexShrink={0}
+						/>
+
+						<Box
+							display={{ base: "none", lg: "block" }}
+							minW={0}
+							overflowX="auto"
+							css={{
+								"&::-webkit-scrollbar": { display: "none" },
+								scrollbarWidth: "none",
+							}}
+						>
+							<Tabs.Root
+								value={selectedTab}
+								onValueChange={handleTabChange}
+								variant="line"
+								colorPalette="brand"
+							>
+								<Tabs.List borderBottom="none" gap={1}>
+									{TABS.map((tab) => (
+										<Tabs.Trigger
+											key={tab.value}
+											value={tab.value}
+											flexShrink={0}
+											gap={2}
+											px={3}
+											py={2}
+											fontSize="sm"
+											fontWeight="semibold"
+											color="ink.500"
+											_hover={{ color: "ink.800" }}
+											_selected={{ color: "brand.600" }}
+										>
+											<tab.Icon size={17} />
+											{tab.label}
+										</Tabs.Trigger>
+									))}
+								</Tabs.List>
+							</Tabs.Root>
+						</Box>
+					</Flex>
+
+					{/* Right cluster — scope (agency/subaccount) + global actions.
+					    Allowed to shrink (minW=0) so the subaccount picker inside
+					    the LevelSwitcher can truncate; the status / Publish /
+					    profile children keep their own flexShrink={0}. */}
+					<Flex align="center" gap={{ base: 1, md: 2.5 }} minW={0}>
+						<LevelSwitcher />
+						<SaveStatusIndicator />
+						<PublishMene />
+						<Profile />
+					</Flex>
 				</Flex>
-			</Flex>
+			</Box>
+
+			{/* Mobile bottom navigation — Android-style tab bar. Shown below lg,
+			    where the top bar has no room for the section tabs. Fixed to the
+			    viewport bottom; MainLayout adds matching bottom padding so
+			    content never hides behind it. */}
 			<Flex
 				as="nav"
-				borderRadius="md"
-				align="center"
-				w={["95%", "92%", "90%", "90%"]}
-				minH={["4vh", "4vh", "8vh", "8vh"]}
-				margin="0 auto"
+				aria-label="Sections"
+				display={{ base: "flex", lg: "none" }}
+				position="fixed"
+				bottom={0}
+				left={0}
+				right={0}
+				zIndex="800"
 				bg="white"
-				position="relative"
-				transform="translateY(35%)"
-				boxShadow="md"
-				justify="space-between"
-				gap={{ base: 2, md: 4 }}
-				flexWrap="nowrap"
-				px={{ base: 3, md: 6 }}
-				py={{ base: 2, md: 0 }}
+				borderTop="1px solid"
+				borderColor="ink.200"
+				boxShadow="0 -2px 12px rgba(16, 24, 40, 0.08)"
+				justify="space-around"
+				align="stretch"
 			>
-				<LevelSwitcher />
-				{/*
-				  Tabs container takes the remaining space (flex=1) and is allowed
-				  to shrink past its content size (minW=0). If the LevelSwitcher
-				  becomes wide (e.g. subaccount picker pill is visible) and the
-				  combined width exceeds the navbar, the tabs scroll horizontally
-				  instead of wrapping to a new line. Scrollbar is hidden for a
-				  clean look — trackpad/touch scrolling still works.
-				*/}
-				<Box
-					flex="1"
-					minW={0}
-					overflowX="auto"
-					css={{
-						"&::-webkit-scrollbar": { display: "none" },
-						"scrollbarWidth": "none",
-					}}
-				>
-					<Tabs.Root
-						value={selectedTab}
-						variant={"subtle"}
-						style={{
-							border: "none",
-							boxShadow: "none",
-						}}
-						onValueChange={handleTabChange}
-					>
-						<Tabs.List>
-							<Tabs.Trigger
-								_selected={{ bg: "blackAlpha.800", color: "white" }}
-								borderRadius={"md"}
-								px={{ base: 3, md: 4, lg: 5 }}
-								py={{ base: 3, md: 4 }}
-								fontSize={{ base: "sm", md: "md" }}
-								value="themeCustomize"
-								flexShrink={0}
+				{TABS.map((tab) => {
+					const isActive = selectedTab === tab.value;
+					return (
+						<Box
+							as="button"
+							key={tab.value}
+							onClick={() => handleTabChange({ value: tab.value })}
+							aria-label={tab.label}
+							aria-current={isActive ? "page" : undefined}
+							display="flex"
+							flexDirection="column"
+							alignItems="center"
+							justifyContent="center"
+							gap={1}
+							flex="1"
+							py={2}
+							border="none"
+							bg="transparent"
+							cursor="pointer"
+							color={isActive ? "brand.600" : "ink.500"}
+							transition="color 0.15s ease, background-color 0.15s ease"
+							_active={{ bg: "ink.100" }}
+						>
+							<tab.Icon size={20} />
+							<Text
+								fontSize="10px"
+								fontWeight={isActive ? "bold" : "medium"}
+								whiteSpace="nowrap"
+								lineHeight="1"
 							>
-								<LuLayoutDashboard />
-								<Box display={{ base: "none", lg: "block" }}>
-									Theme Customize
-								</Box>
-							</Tabs.Trigger>
-							<Tabs.Trigger
-								_selected={{ bg: "blackAlpha.800", color: "white" }}
-								borderRadius={"md"}
-								px={{ base: 3, md: 4, lg: 5 }}
-								py={{ base: 3, md: 4 }}
-								fontSize={{ base: "sm", md: "md" }}
-								value="loginTheme"
-								flexShrink={0}
-							>
-								<AiOutlineLogin />
-								<Box display={{ base: "none", lg: "block" }}>
-									Login Theme
-								</Box>
-							</Tabs.Trigger>
-							<Tabs.Trigger
-								_selected={{ bg: "blackAlpha.800", color: "white" }}
-								borderRadius={"md"}
-								px={{ base: 3, md: 4, lg: 5 }}
-								py={{ base: 3, md: 4 }}
-								fontSize={{ base: "sm", md: "md" }}
-								value="loaderAnimations"
-								flexShrink={0}
-							>
-								<TbLoader3 />
-								<Box display={{ base: "none", lg: "block" }}>
-									Loader Animations
-								</Box>
-							</Tabs.Trigger>
-							<Tabs.Trigger
-								_selected={{ bg: "blackAlpha.800", color: "white" }}
-								borderRadius={"md"}
-								px={{ base: 3, md: 4, lg: 5 }}
-								py={{ base: 3, md: 4 }}
-								fontSize={{ base: "sm", md: "md" }}
-								value="customCss"
-								flexShrink={0}
-							>
-								<FaCode />
-								<Box display={{ base: "none", lg: "block" }}>
-									Custom CSS
-								</Box>
-							</Tabs.Trigger>
-						</Tabs.List>
-					</Tabs.Root>
-				</Box>
-
+								{tab.label}
+							</Text>
+						</Box>
+					);
+				})}
 			</Flex>
-		</Box>
+		</>
 	);
 };
 
